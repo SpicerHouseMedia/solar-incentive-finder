@@ -47,14 +47,14 @@
                     Discover federal tax credits, state rebates, and local programs available in your area. Enter your zip code to see what you qualify for.
                 </p>
                 <div class="bg-white rounded-2xl shadow-xl p-6 sm:p-8 max-w-md mx-auto">
-                    <form id="zip-form" class="space-y-4">
-                        <input type="text" id="zip-code" pattern="[0-9]{5}" placeholder="Enter your zip code" maxlength="5" 
-                            class="w-full text-center text-2xl font-bold tracking-widest px-4 py-3 border-2 border-amber-300 rounded-lg focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-200">
-                        <button type="submit" id="submit-btn" disabled
-                            class="w-full bg-amber-500 hover:bg-amber-600 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-bold text-lg py-3 px-6 rounded-lg transition-colors">
-                            See My Incentives →
-                        </button>
-                    </form>
+                <form action="/results/" method="get" id="zip-form" class="space-y-4">
+                    <input type="text" id="zip-code" name="zip" pattern="[0-9]{5}" placeholder="Enter your zip code" inputmode="numeric" maxlength="5" 
+                        class="w-full text-center text-2xl font-bold tracking-widest px-4 py-3 border-2 border-amber-300 rounded-lg focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-200" required>
+                    <button type="submit" id="submit-btn"
+                        class="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold text-lg py-3 px-6 rounded-lg transition-colors">
+                        See My Incentives →
+                    </button>
+                </form>
                     <p class="text-xs text-slate-500 mt-3">Free to use • No personal info required</p>
                 </div>
             </div>
@@ -193,19 +193,15 @@
     </footer>
 
     <script>
-        const zipInput = document.getElementById('zip-code');
-        const submitBtn = document.getElementById('submit-btn');
-        
-        zipInput.addEventListener('input', (e) => {
+        // Enhancement only - fallback is standard HTML form
+        document.getElementById('zip-code').addEventListener('input', (e) => {
             e.target.value = e.target.value.replace(/[^0-9]/g, '');
-            submitBtn.disabled = e.target.value.length !== 5;
         });
-        
         document.getElementById('zip-form').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const zip = zipInput.value;
-            if (zip.length === 5) {
-                window.location.href = `/results/?zip=${zip}`;
+            const zip = document.getElementById('zip-code').value;
+            if (zip.length !== 5) { 
+                e.preventDefault(); 
+                alert('Please enter a valid 5-digit zip code.');
             }
         });
     </script>

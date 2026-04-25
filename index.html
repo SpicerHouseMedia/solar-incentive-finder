@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SolarIncentiveFinder | Check Federal & State Solar Rebates</title>
+    <meta name="description" content="Find all available federal and state solar tax credits, rebates, and incentives by your zip code. Updated for 2026.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .hero-gradient { background: linear-gradient(135deg, #fef3c7 0%, #fde68a 50%, #fbbf24 100%); }
+        .sun-glow { box-shadow: 0 0 60px rgba(251, 191, 36, 0.4); }
+        .state-card { transition: all 0.2s ease; }
+        .state-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    </style>
+</head>
+<body class="bg-slate-50">
+    <!-- NAV -->
+    <nav class="bg-white shadow-sm border-b border-slate-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <a href="/" class="flex items-center gap-2">
+                    <span class="text-2xl">☀️</span>
+                    <span class="font-bold text-slate-900 text-lg hidden sm:inline">SolarIncentiveFinder</span>
+                </a>
+                <div class="flex items-center gap-4 sm:gap-6 text-sm">
+                    <a href="/blog/" class="text-slate-600 hover:text-slate-900">Blog</a>
+                    <a href="/about/" class="text-slate-600 hover:text-slate-900">About</a>
+                    <a href="/privacy/" class="text-slate-600 hover:text-slate-900">Privacy</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- HERO -->
+    <section class="hero-gradient">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
+            <div class="text-center">
+                <span class="inline-block bg-amber-200 text-amber-800 text-sm font-medium px-3 py-1 rounded-full mb-4">Updated for 2026</span>
+                <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 mb-4">
+                    Find Your <span class="text-amber-600">Solar Incentives</span>
+                </h1>
+                <p class="text-lg sm:text-xl text-slate-700 mb-8 max-w-2xl mx-auto">
+                    Discover federal tax credits, state rebates, and local programs available in your area. Enter your zip code to see what you qualify for.
+                </p>
+                <div class="bg-white rounded-2xl shadow-xl p-6 sm:p-8 max-w-md mx-auto">
+                    <form id="zip-form" class="space-y-4">
+                        <input type="text" id="zip-code" pattern="[0-9]{5}" placeholder="Enter your zip code" maxlength="5" 
+                            class="w-full text-center text-2xl font-bold tracking-widest px-4 py-3 border-2 border-amber-300 rounded-lg focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-200">
+                        <button type="submit" id="submit-btn" disabled
+                            class="w-full bg-amber-500 hover:bg-amber-600 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-bold text-lg py-3 px-6 rounded-lg transition-colors">
+                            See My Incentives →
+                        </button>
+                    </form>
+                    <p class="text-xs text-slate-500 mt-3">Free to use • No personal info required</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- KEY STATS -->
+    <section class="bg-white py-8">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-6 text-center">
+                <div>
+                    <div class="text-2xl sm:text-3xl font-bold text-amber-500">30%</div>
+                    <div class="text-sm text-slate-600 mt-1">Federal Tax Credit</div>
+                </div>
+                <div>
+                    <div class="text-2xl sm:text-3xl font-bold text-amber-500">50</div>
+                    <div class="text-sm text-slate-600 mt-1">States Covered</div>
+                </div>
+                <div class="col-span-2 md:col-span-1">
+                    <div class="text-2xl sm:text-3xl font-bold text-amber-500">$7,500+</div>
+                    <div class="text-sm text-slate-600 mt-1">Avg. Total Savings</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FEATURED STATE: California (as a teaser) -->
+    <section class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <h2 class="text-2xl font-bold text-slate-900 mb-6">Popular States</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <a href="/states/ca/" class="state-card bg-white rounded-lg p-4 border border-slate-200 block">
+                <div class="font-semibold text-slate-900">California</div>
+                <div class="text-sm text-slate-500">Net Metering, SGIP & more</div>
+                <div class="text-xs text-amber-600 mt-2 font-medium">12 incentives available →</div>
+            </a>
+            <a href="/states/tx/" class="state-card bg-white rounded-lg p-4 border border-slate-200 block">
+                <div class="font-semibold text-slate-900">Texas</div>
+                <div class="text-sm text-slate-500">Property Tax Exemption, Rebates</div>
+                <div class="text-xs text-amber-600 mt-2 font-medium">8 incentives available →</div>
+            </a>
+            <a href="/states/fl/" class="state-card bg-white rounded-lg p-4 border border-slate-200 block">
+                <div class="font-semibold text-slate-900">Florida</div>
+                <div class="text-sm text-slate-500">Sales Tax Exemption, Rebates</div>
+                <div class="text-xs text-amber-600 mt-2 font-medium">6 incentives available →</div>
+            </a>
+        </div>
+        <div class="mt-6 text-center">
+            <a href="/blog/50-states-solar-incentives/" class="text-amber-600 hover:text-amber-700 font-medium">View all 50 states →</a>
+        </div>
+    </section>
+
+    <!-- WHAT'S COVERED -->
+    <section class="bg-slate-900 text-white py-12 sm:py-16">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-2xl sm:text-3xl font-bold text-center mb-8">What You Could Save</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div class="flex items-start gap-3">
+                    <div class="text-amber-400 text-xl mt-0.5">✓</div>
+                    <div>
+                        <div class="font-semibold mb-1">Federal Tax Credit (ITC)</div>
+                        <div class="text-sm text-slate-300">30% of your total solar installation cost as a federal tax credit through 2032</div>
+                    </div>
+                </div>
+                <div class="flex items-start gap-3">
+                    <div class="text-amber-400 text-xl mt-0.5">✓</div>
+                    <div>
+                        <div class="font-semibold mb-1">State & Local Rebates</div>
+                        <div class="text-sm text-slate-300">Cash-back programs from state governments, utilities, and municipalities</div>
+                    </div>
+                </div>
+                <div class="flex items-start gap-3">
+                    <div class="text-amber-400 text-xl mt-0.5">✓</div>
+                    <div>
+                        <div class="font-semibold mb-1">Property Tax Exemptions</div>
+                        <div class="text-sm text-slate-300">Your home won't be assessed at a higher value because of solar panels</div>
+                    </div>
+                </div>
+                <div class="flex items-start gap-3">
+                    <div class="text-amber-400 text-xl mt-0.5">✓</div>
+                    <div>
+                        <div class="font-semibold mb-1">Net Metering</div>
+                        <div class="text-sm text-slate-300">Sell excess power back to your utility company for credits on your bill</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+        <h2 class="text-2xl font-bold text-slate-900 mb-6">Frequently Asked Questions</h2>
+        <div class="space-y-4">
+            <details class="bg-white rounded-lg border border-slate-200 p-4">
+                <summary class="font-semibold text-slate-900 cursor-pointer">How much is the federal solar tax credit in 2026?</summary>
+                <p class="text-slate-600 mt-2">The federal solar Investment Tax Credit (ITC) is 30% of your total installation costs, including equipment, labor, and permitting. This credit has no maximum limit.</p>
+            </details>
+            <details class="bg-white rounded-lg border border-slate-200 p-4">
+                <summary class="font-semibold text-slate-900 cursor-pointer">How do I claim the solar tax credit?</summary>
+                <p class="text-slate-600 mt-2">File IRS Form 5695 with your annual tax return. Your solar installer will provide documentation of the total system cost.</p>
+            </details>
+            <details class="bg-white rounded-lg border border-slate-200 p-4">
+                <summary class="font-semibold text-slate-900 cursor-pointer">Are solar incentives available in my state?</summary>
+                <p class="text-slate-600 mt-2">Most states offer at least one solar incentive program. Enter your zip code above to find all programs available in your area.</p>
+            </details>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="bg-slate-900 text-slate-300 mt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-8">
+                <div>
+                    <h3 class="text-lg font-semibold text-white mb-3">☀️ SolarIncentiveFinder</h3>
+                    <p class="text-sm text-slate-400">Helping homeowners discover and claim solar incentives across all 50 states.</p>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-white mb-3">Quick Links</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="/" class="hover:text-white transition">Home</a></li>
+                        <li><a href="/about/" class="hover:text-white transition">About</a></li>
+                        <li><a href="/blog/" class="hover:text-white transition">Blog</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-white mb-3">Legal</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="/privacy/" class="hover:text-white transition">Privacy Policy</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-slate-700 mt-8 pt-8 text-center text-sm text-slate-500">
+                <p>© 2026 SolarIncentiveFinder. All rights reserved. Incentive data from DSIRE (dsireusa.org), NREL, and the Database of State Incentives for Renewables & Efficiency.</p>
+                <p class="mt-2 text-xs text-slate-600">Information provided for educational purposes only. Not financial or tax advice. Consult a qualified professional before making decisions.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const zipInput = document.getElementById('zip-code');
+        const submitBtn = document.getElementById('submit-btn');
+        
+        zipInput.addEventListener('input', (e) => {
+            e.target.value = e.target.value.replace(/[^0-9]/g, '');
+            submitBtn.disabled = e.target.value.length !== 5;
+        });
+        
+        document.getElementById('zip-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const zip = zipInput.value;
+            if (zip.length === 5) {
+                window.location.href = `/results/?zip=${zip}`;
+            }
+        });
+    </script>
+</body>
+</html>

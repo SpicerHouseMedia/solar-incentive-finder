@@ -114,6 +114,8 @@
         </nav>
     </main>
 
+    <div id="savings-calc"></div>
+    <!-- CALCULATOR PLACEHOLDER -->
     <footer class="bg-slate-900 text-slate-300 mt-16">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-8">
@@ -141,5 +143,64 @@
             </div>
         </div>
     </footer>
+
+<script>
+    const DATA = {"al": {"kwh": 0.14, "sun": 4.5}, "ak": {"kwh": 0.21, "sun": 2.5}, "az": {"kwh": 0.13, "sun": 6.5}, "ar": {"kwh": 0.12, "sun": 4.5}, "ca": {"kwh": 0.27, "sun": 5.5}, "co": {"kwh": 0.14, "sun": 5.0}, "ct": {"kwh": 0.28, "sun": 4.0}, "de": {"kwh": 0.15, "sun": 4.5}, "fl": {"kwh": 0.14, "sun": 5.0}, "ga": {"kwh": 0.13, "sun": 5.0}, "hi": {"kwh": 0.41, "sun": 6.0}, "id": {"kwh": 0.1, "sun": 4.5}, "il": {"kwh": 0.15, "sun": 4.0}, "in": {"kwh": 0.14, "sun": 4.0}, "ia": {"kwh": 0.14, "sun": 4.5}, "ks": {"kwh": 0.13, "sun": 5.0}, "ky": {"kwh": 0.12, "sun": 4.0}, "la": {"kwh": 0.12, "sun": 5.0}, "me": {"kwh": 0.2, "sun": 4.0}, "md": {"kwh": 0.17, "sun": 4.5}, "ma": {"kwh": 0.28, "sun": 4.0}, "mi": {"kwh": 0.19, "sun": 3.5}, "mn": {"kwh": 0.15, "sun": 4.0}, "ms": {"kwh": 0.13, "sun": 4.5}, "mo": {"kwh": 0.12, "sun": 4.5}, "mt": {"kwh": 0.11, "sun": 4.5}, "ne": {"kwh": 0.11, "sun": 5.0}, "nv": {"kwh": 0.12, "sun": 6.0}, "nh": {"kwh": 0.21, "sun": 4.0}, "nj": {"kwh": 0.17, "sun": 4.0}, "nm": {"kwh": 0.13, "sun": 6.0}, "ny": {"kwh": 0.18, "sun": 3.5}, "nc": {"kwh": 0.11, "sun": 4.5}, "nd": {"kwh": 0.11, "sun": 4.0}, "oh": {"kwh": 0.14, "sun": 4.0}, "ok": {"kwh": 0.11, "sun": 5.0}, "or": {"kwh": 0.11, "sun": 4.5}, "pa": {"kwh": 0.16, "sun": 3.5}, "ri": {"kwh": 0.2, "sun": 4.0}, "sc": {"kwh": 0.14, "sun": 5.0}, "sd": {"kwh": 0.12, "sun": 4.5}, "tn": {"kwh": 0.12, "sun": 4.5}, "tx": {"kwh": 0.13, "sun": 5.0}, "ut": {"kwh": 0.1, "sun": 5.0}, "vt": {"kwh": 0.2, "sun": 3.5}, "va": {"kwh": 0.14, "sun": 4.5}, "wa": {"kwh": 0.11, "sun": 4.0}, "wv": {"kwh": 0.12, "sun": 4.0}, "wi": {"kwh": 0.18, "sun": 3.5}, "wy": {"kwh": 0.11, "sun": 5.0}};
+    
+    function initCalc() {
+        const path = window.location.pathname; 
+        const match = path.match(/states\/(\w+)\//);
+        if(!match) return;
+        const state = match[1];
+        const info = DATA[state] || {kwh: 0.15, sun: 4.5};
+        
+        const params = new URLSearchParams(window.location.search);
+        const zip = params.get('zip');
+        
+        const container = document.getElementById('savings-calc');
+        if(!container) return;
+
+        container.innerHTML = `
+            <div class="bg-slate-50 rounded-xl p-6 border border-slate-200 mt-8">
+                <h3 class="text-xl font-bold text-slate-900 mb-2">💡 Estimate Your Savings</h3>
+                <p class="text-sm text-slate-600 mb-4">Based on average rates in this state. Enter your monthly bill.</p>
+                <div class="flex gap-2 mb-4">
+                    <span class="inline-flex items-center px-3 text-sm text-slate-500 bg-slate-200 border border-r-0 border-slate-300 rounded-l-md">$</span>
+                    <input type="number" id="bill-input" class="rounded-none rounded-r-lg bg-white border border-slate-300 text-slate-900 block flex-1 min-w-0 w-full text-sm p-2.5" placeholder="150" value="${zip ? '150' : ''}">
+                    <button onclick="doCalc()" class="bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-lg px-4 py-2 text-sm">Calculate</button>
+                </div>
+                <div id="calc-result" class="hidden bg-white rounded-lg p-4 border border-amber-200 space-y-3">
+                    <div class="flex justify-between border-b pb-2"><span class="text-slate-500">Monthly Usage</span><span class="font-bold" id="res-kwh">0 kWh</span></div>
+                    <div class="flex justify-between border-b pb-2"><span class="text-slate-500">Est. System Size</span><span class="font-bold" id="res-size">0 kW</span></div>
+                    <div class="flex justify-between border-b pb-2"><span class="text-slate-500">Est. Installed Cost</span><span class="font-bold" id="res-cost">$0</span></div>
+                    <div class="flex justify-between pt-1"><span class="text-amber-600 font-bold">Fed Tax Credit (30%)</span><span class="font-bold text-emerald-600" id="res-credit">-$0</span></div>
+                    <div class="flex justify-between bg-amber-50 p-2 rounded mt-2"><span class="text-amber-900 font-bold">Net Cost</span><span class="font-bold text-amber-900" id="res-net">$0</span></div>
+                </div>
+            </div>
+        `;
+
+        window.doCalc = function() {
+            const bill = parseFloat(document.getElementById('bill-input').value);
+            if(!bill) return;
+            
+            const kwh = bill / info.kwh;
+            // Simple sizing: (kwh * 12) / (sun * 365 * 0.8)
+            const size = (kwh * 12) / (info.sun * 365 * 0.80);
+            const cost = size * 3000;
+            const credit = cost * 0.30;
+            const net = cost - credit;
+
+            document.getElementById('res-kwh').innerText = Math.round(kwh) + " kWh";
+            document.getElementById('res-size').innerText = size.toFixed(1) + " kW";
+            document.getElementById('res-cost').innerText = "$" + cost.toLocaleString("en-US", {maximumFractionDigits: 0});
+            document.getElementById('res-credit').innerText = "-$" + credit.toLocaleString("en-US", {maximumFractionDigits: 0});
+            document.getElementById('res-net').innerText = "$" + net.toLocaleString("en-US", {maximumFractionDigits: 0});
+            
+            document.getElementById('calc-result').classList.remove('hidden');
+        }
+    }
+    window.addEventListener('load', initCalc);
+</script>
+
 </body>
 </html>

@@ -5,136 +5,57 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Finding Your Solar Incentives | SolarIncentiveFinder</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>body { font-family: 'Inter', sans-serif; }</style>
 </head>
 <body class="bg-slate-50 min-h-screen flex flex-col items-center justify-center p-4">
-
-    <nav class="fixed top-0 left-0 right-0 bg-white shadow-sm border-b border-slate-200 z-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16">
-                <a href="/" class="flex items-center gap-2">
-                    <span class="text-2xl">☀️</span>
-                    <span class="font-bold text-slate-900 text-lg">SolarIncentiveFinder</span>
-                </a>
-                <div class="hidden sm:flex items-center gap-6 text-sm">
-                    <a href="/blog/" class="text-slate-600 hover:text-slate-900">Blog</a>
-                    <a href="/about/" class="text-slate-600 hover:text-slate-900">About</a>
-                    <a href="/privacy/" class="text-slate-600 hover:text-slate-900">Privacy</a>
-                </div>
-            </div>
-        </div>
-    </nav>
-
-    <div class="bg-white rounded-xl shadow-lg p-8 text-center max-w-md w-full mt-16" id="loading-box">
+    <div class="bg-white rounded-xl shadow-lg p-8 text-center max-w-md w-full">
         <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-500 mx-auto mb-4"></div>
         <h2 class="text-xl font-bold text-slate-900">Finding Your Incentives...</h2>
         <p class="text-slate-500 mt-2">We're matching your zip code to local programs.</p>
     </div>
-
-    <div id="fallback-box" class="text-center mt-16 hidden">
-        <h2 class="text-xl font-bold text-slate-900 mb-2">Select Your State</h2>
-        <p class="text-slate-500 mb-4">We couldn't automatically detect your state. Please select it below.</p>
-        <a href="/blog/" class="inline-block bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 px-8 rounded-lg transition-colors">Browse All States →</a>
-    </div>
-
     <script>
-        // Comprehensive Zip-to-State mapping (Min/Max ranges)
         const ranges = [
-            { s: 'al', min: 35004, max: 36925 },
-            { s: 'ak', min: 99501, max: 99950 },
-            { s: 'az', min: 85001, max: 86556 },
-            { s: 'ar', min: 71601, max: 72959 },
-            { s: 'ca', min: 90001, max: 96167 },
-            { s: 'co', min: 80001, max: 81658 },
-            { s: 'ct', min: '06001', max: '06928' },
-            { s: 'de', min: '19701', max: '19980' },
-            { s: 'fl', min: 32004, max: 34997 },
-            { s: 'ga', min: 30002, max: 31909 },
-            { s: 'hi', min: 96701, max: 96898 },
-            { s: 'id', min: 83201, max: 83876 },
-            { s: 'il', min: 60001, max: 62999 },
-            { s: 'in', min: 46001, max: 47997 },
-            { s: 'ia', min: 50001, max: 52809 },
-            { s: 'ks', min: 66002, max: 67954 },
-            { s: 'ky', min: 40003, max: 42788 },
-            { s: 'la', min: 70001, max: 71497 },
-            { s: 'me', min: '03901', max: '04992' },
-            { s: 'md', min: 20588, max: 21930 },
-            { s: 'ma', min: '01001', max: '02791' },
-            { s: 'mi', min: 48001, max: 49971 },
-            { s: 'mn', min: 55001, max: 56763 },
-            { s: 'ms', min: 38601, max: 39776 },
-            { s: 'mo', min: 63001, max: 65897 },
-            { s: 'mt', min: 59001, max: 59937 },
-            { s: 'ne', min: '68001', max: '69367' },
-            { s: 'nv', min: 88901, max: 89883 },
-            { s: 'nh', min: '03001', max: '03897' },
-            { s: 'nj', min: '07001', max: '08989' },
-            { s: 'nm', min: 87001, max: 88441 },
-            { s: 'ny', min: '00501', max: '14925' },
-            { s: 'nc', min: 27006, max: 28909 },
-            { s: 'nd', min: 58001, max: 58856 },
-            { s: 'oh', min: '43001', max: '45999' },
-            { s: 'ok', min: 73001, max: 74966 },
-            { s: 'or', min: 97001, max: 97920 },
-            { s: 'pa', min: 15001, max: 19640 },
-            { s: 'ri', min: '02801', max: '02940' },
-            { s: 'sc', min: 29001, max: 29945 },
-            { s: 'sd', min: 57001, max: 57793 },
-            { s: 'tn', min: 37010, max: 38589 },
-            { s: 'tx', min: 73301, max: 88595 },
-            { s: 'ut', min: '84001', max: '84784' },
-            { s: 'vt', min: '05001', max: '05907' },
-            { s: 'va', min: 20001, max: 24658 },
-            { s: 'wa', min: 98001, max: 99403 },
-            { s: 'wv', min: 24701, max: 26886 },
-            { s: 'wi', min: 53001, max: 54990 },
-            { s: 'wy', min: 82001, max: 83128 },
-            { s: 'dc', min: 20001, max: 20020 } // DC redirects to VA or just shows VA
+            { s: 'al', min: 35004, max: 36925 }, { s: 'ak', min: 99501, max: 99950 },
+            { s: 'az', min: 85001, max: 86556 }, { s: 'ar', min: 71601, max: 72959 },
+            { s: 'ca', min: 90001, max: 96167 }, { s: 'co', min: 80001, max: 81658 },
+            { s: 'ct', min: '06001', max: '06928' }, { s: 'de', min: '19701', max: '19980' },
+            { s: 'fl', min: 32004, max: 34997 }, { s: 'ga', min: 30002, max: 31909 },
+            { s: 'hi', min: 96701, max: 96898 }, { s: 'id', min: 83201, max: 83876 },
+            { s: 'il', min: 60001, max: 62999 }, { s: 'in', min: 46001, max: 47997 },
+            { s: 'ia', min: 50001, max: 52809 }, { s: 'ks', min: 66002, max: 67954 },
+            { s: 'ky', min: 40003, max: 42788 }, { s: 'la', min: 70001, max: 71497 },
+            { s: 'me', min: '03901', max: '04992' }, { s: 'md', min: 20588, max: 21930 },
+            { s: 'ma', min: '01001', max: '02791' }, { s: 'mi', min: 48001, max: 49971 },
+            { s: 'mn', min: 55001, max: 56763 }, { s: 'ms', min: 38601, max: 39776 },
+            { s: 'mo', min: 63001, max: 65897 }, { s: 'mt', min: 59001, max: 59937 },
+            { s: 'ne', min: '68001', max: '69367' }, { s: 'nv', min: 88901, max: 89883 },
+            { s: 'nh', min: '03001', max: '03897' }, { s: 'nj', min: '07001', max: '08989' },
+            { s: 'nm', min: 87001, max: 88441 }, { s: 'ny', min: '00501', max: '14925' },
+            { s: 'nc', min: 27006, max: 28909 }, { s: 'nd', min: 58001, max: 58856 },
+            { s: 'oh', min: '43001', max: '45999' }, { s: 'ok', min: 73001, max: 74966 },
+            { s: 'or', min: 97001, max: 97920 }, { s: 'pa', min: 15001, max: 19640 },
+            { s: 'ri', min: '02801', max: '02940' }, { s: 'sc', min: 29001, max: 29945 },
+            { s: 'sd', min: 57001, max: 57793 }, { s: 'tn', min: 37010, max: 38589 },
+            { s: 'tx', min: 73301, max: 88595 }, { s: 'ut', min: '84001', max: '84784' },
+            { s: 'vt', min: '05001', max: '05907' }, { s: 'va', min: 20001, max: 24658 },
+            { s: 'wa', min: 98001, max: 99403 }, { s: 'wv', min: 24701, max: 26886 },
+            { s: 'wi', min: 53001, max: 54990 }, { s: 'wy', min: 82001, max: 83128 },
+            { s: 'dc', min: 20001, max: 20599 }
         ];
-
-        function findState(zipStr) {
-            const zip = parseInt(zipStr, 10);
-            // Check for leading zero zip codes (0xxxx)
-            const isLeadingZero = zipStr.startsWith('0');
-            
+        function findState(zip) {
             for (const range of ranges) {
-                let min = parseInt(range.min, 10);
-                let max = parseInt(range.max, 10);
-                
-                // Handle leading zero states correctly
-                if (isLeadingZero) {
-                    // For states with 0xxxx zip, range.min/max are stored as numbers without leading zero usually?
-                    // Actually, parseInt('05001') is 5001. 
-                    // So we just parse the input string and compare.
-                }
-                
-                if (zip >= min && zip <= max) {
-                    return range.s;
-                }
+                if (zip >= range.min && zip <= range.max) return range.s;
             }
             return null;
         }
-
-        // Get zip from URL
         const params = new URLSearchParams(window.location.search);
         const zip = params.get('zip');
-
-        if (zip && zip.length === 5) {
-            const state = findState(zip);
-            if (state) {
-                // Redirect to state page
-                window.location.href = '/states/' + state + '/';
-            } else {
-                // Fallback
-                document.getElementById('loading-box').classList.add('hidden');
-                document.getElementById('fallback-box').classList.remove('hidden');
-            }
+        const state = findState(parseInt(zip));
+        if (state) {
+            // PASS THE ZIP ALONG
+            window.location.href = '/states/' + state + '/?zip=' + zip;
         } else {
-            document.getElementById('loading-box').innerHTML = '<h2 class="text-xl font-bold text-slate-900">Invalid Zip Code</h2><p class="text-slate-500 mt-2">Please go back and try again.</p>';
+            window.location.href = '/blog/';
         }
     </script>
 </body>

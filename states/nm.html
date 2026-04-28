@@ -9,6 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <style>body { font-family: 'Inter', sans-serif; }</style>
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-XBQZ4X9FZR"></script>
@@ -34,7 +35,11 @@
         </div>
     </nav>
 
-    <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-20">
+    <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-20">    
+    <!-- DYNAMIC RESULTS CONTAINER -->
+    <div id="dynamic-results" class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 mb-8"></div>
+    
+
         <div class="bg-white rounded-xl p-6 sm:p-10 shadow-sm border border-slate-200">
             <nav class="flex items-center text-sm text-slate-500 mb-6">
                 <a href="/" class="hover:text-slate-900">Home</a>
@@ -213,5 +218,6 @@
     window.addEventListener('load', initCalc);
 </script>
 
+    <script defer src="/js/interactive-results.js"></script>
 </body>
 </html>

@@ -137,12 +137,27 @@ function showResults(zip, state) {
 }
 
 function unlockContent(email, zip, state) {
+    const scriptUrl = "https://script.google.com/macros/s/AKfycbxp5CDO40dghD5ubQnU1XMLO0uoH0mK7i52nl_yu-6RDziolwRfRZHHTOIYiv1e-DZ3TA/exec";
+    
     document.getElementById('gate-overlay').classList.add('hidden');
     document.getElementById('blurred-content').classList.remove('blur-sm', 'select-none', 'pointer-events-none');
     document.getElementById('user-email').value = '✅ Report Sent!';
     document.getElementById('user-email').disabled = true;
     document.getElementById('unlock-btn').textContent = 'Done';
     document.getElementById('unlock-btn').disabled = true;
+
+    // Send lead data to Google Sheets
+    fetch(scriptUrl, {
+        method: "POST",
+        mode: "no-cors",
+        body: JSON.stringify({
+            email: email,
+            zip: zip,
+            state: state,
+            bill: "" // Placeholder for future bill slider
+        })
+    }).then(() => console.log("Lead captured successfully"))
+      .catch(err => console.error("Lead capture failed:", err));
 }
 
 function getBaseSavings(state) {

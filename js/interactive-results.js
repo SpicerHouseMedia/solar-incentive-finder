@@ -1,81 +1,120 @@
 /**
  * SolarIncentiveFinder - Interactive Results & Lead Gen
  * Features:
- * 1. Labor Illusion Loader (Builds trust)
- * 2. Dynamic Savings Calculator based on Zip/State
- * 3. Gated Results (Email Capture + Monthly Bill)
- * 4. Trend Ticker (Social Proof)
+ * 1. Pre-Loader Step: Zip + Bill Input
+ * 2. Labor Illusion Loader
+ * 3. Smart Usage Estimation (Bill -> kWh)
+ * 4. Gated Results (Email Capture)
+ * 5. Trend Ticker
  */
 
-// Global Trend Data for Social Proof
 const trendData = {
     states: ['Texas', 'Florida', 'California', 'Arizona', 'Ohio', 'Pennsylvania', 'Georgia', 'New York'],
     counts: ['140', '89', '201', '156', '42', '78', '93', '112'],
     amounts: ['$18,500', '$15,200', '$22,100', '$19,000', '$12,400', '$16,800', '$14,900', '$24,500']
 };
 
+// Average $/kWh by State (US EIA Data approx.)
+const stateRates = { 
+    'AL': 0.13, 'AK': 0.24, 'AZ': 0.14, 'AR': 0.11, 'CA': 0.28, 'CO': 0.13, 'CT': 0.30, 'DE': 0.15, 
+    'FL': 0.14, 'GA': 0.12, 'HI': 0.44, 'ID': 0.10, 'IL': 0.14, 'IN': 0.14, 'IA': 0.13, 'KS': 0.12, 
+    'KY': 0.12, 'LA': 0.11, 'ME': 0.25, 'MD': 0.16, 'MA': 0.28, 'MI': 0.17, 'MN': 0.14, 'MS': 0.11, 
+    'MO': 0.11, 'MT': 0.11, 'NE': 0.10, 'NV': 0.13, 'NH': 0.24, 'NJ': 0.18, 'NM': 0.13, 'NY': 0.22, 
+    'NC': 0.12, 'ND': 0.10, 'OH': 0.14, 'OK': 0.11, 'OR': 0.11, 'PA': 0.15, 'RI': 0.26, 'SC': 0.12, 
+    'SD': 0.11, 'TN': 0.11, 'TX': 0.13, 'UT': 0.11, 'VT': 0.21, 'VA': 0.12, 'WA': 0.10, 'WV': 0.11, 
+    'WI': 0.16, 'WY': 0.10, 'US': 0.16
+};
+
 document.addEventListener('DOMContentLoaded', () => {
-    // Homepage Ticker Update
     const ticker = document.getElementById('live-ticker');
     if (ticker) {
         let idx = 0;
         setInterval(() => {
-            ticker.innerHTML = `🔴 Live: <span class="font-bold">${trendData.counts[idx]} homeowners</span> in ${trendData.states[idx]} checked solar savings today!`;
+            ticker.innerHTML = `🔴 Live: <span class="font-bold">${trendData.counts[idx]} homeowners</span> in ${trendData.states[idx]} checked savings today!`;
             idx = (idx + 1) % 8;
         }, 5000);
     }
 
-    // Interactive Results for State Pages
     const container = document.getElementById('dynamic-results');
     if (!container) return;
 
     const urlParams = new URLSearchParams(window.location.search);
     const zip = urlParams.get('zip') || '';
+    const bill = urlParams.get('bill') || '150'; // Default $150
     const state = urlParams.get('state') || window.location.pathname.split('/')[2]?.replace('.html', '') || 'US';
 
-    runInteractiveResults(zip, state);
+    if (!zip) {
+        showInputStep(zip, state, bill, container);
+    } else {
+        runInteractiveResults(zip, state, bill);
+    }
 });
 
-function runInteractiveResults(zip, state) {
+function showInputStep(zip, state, bill, container) {
+    const stateFull = state; // e.g. 'CA'
+
+    container.innerHTML = `
+        <div class="bg-white rounded-xl shadow-lg border border-slate-200 p-6 sm:p-8 text-center">
+            <h2 class="text-2xl font-bold text-slate-900 mb-2">Calculate Your Solar Savings</h2>
+            <p class="text-slate-500 mb-6">Get a custom savings report for ${stateFull} in 10 seconds.</p>
+            
+            <div class="max-w-sm mx-auto space-y-6">
+                <div>
+                    <label class="block text-sm font-bold text-left mb-1">Zip Code</label>
+                    <input type="text" id="zip-input" value="${zip}" placeholder="10001" class="w-full px-4 py-3 border border-slate-300 rounded-lg text-lg focus:outline-none focus:ring-2 focus:ring-amber-500">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-bold text-left mb-1">Avg. Monthly Electric Bill</label>
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="text-xs text-slate-400">$50</span>
+                        <input type="range" id="bill-slider" min="50" max="600" value="${bill}" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-amber-500">
+                        <span class="text-xs text-slate-400">$600+</span>
+                    </div>
+                    <div class="text-center mb-1">
+                        <span id="bill-display" class="text-lg font-bold text-amber-600">$${bill} / mo</span>
+                    </div>
+                </div>
+
+                <button id="calculate-btn" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition shadow-md">
+                    Show My Savings 
+                </button>
+            </div>
+        </div>
+    `;
+
+    const slider = document.getElementById('bill-slider');
+    const display = document.getElementById('bill-display');
+    slider.addEventListener('input', () => display.textContent = `$${slider.value} / mo`);
+
+    document.getElementById('calculate-btn').addEventListener('click', () => {
+        const newZip = document.getElementById('zip-input').value;
+        const newBill = slider.value;
+        if(newZip.length >= 5) {
+            const target = window.location.pathname + '?zip=' + newZip + '&bill=' + newBill + '&state=' + stateFull;
+            window.location.replace(target);
+        } else {
+            document.getElementById('zip-input').classList.add('border-red-500');
+        }
+    });
+}
+
+function runInteractiveResults(zip, state, bill) {
     const container = document.getElementById('dynamic-results');
-    if (!zip) {
-        container.innerHTML = '<div class="text-center py-12 bg-white rounded-xl border border-slate-200"><h3 class="text-xl font-bold text-slate-800">Enter your zip to see your savings</h3></div>';
-        return;
-    }
-    
-    // 1. Initial Loader (Labor Illusion)
     container.innerHTML = `
         <div class="bg-white rounded-xl shadow-lg border border-green-200 p-6 sm:p-8 text-center" id="calc-loader">
             <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-amber-500 mx-auto mb-4"></div>
             <h3 class="text-lg font-bold text-slate-800">Calculating your solar savings...</h3>
-            <p class="text-amber-600 text-sm font-medium mt-2" id="calc-status">Locating your zip code...</p>
+            <p class="text-amber-600 text-sm font-medium mt-2" id="calc-status">Analyzing your energy usage...</p>
         </div>
     `;
 
-    // 2. Sequence of "Calculations"
-    const statuses = [
-        "Matching zip code to municipal tax records...",
-        "Analyzing average sunlight hours for your roof...",
-        "Checking local utility rebates in your area...",
-        "Calculating 30% Federal Tax Credit...",
-        "Generating your savings report..."
-    ];
-
-    let step = 0;
-    const interval = setInterval(() => {
-        document.getElementById('calc-status').textContent = statuses[step];
-        step++;
-        if (step >= statuses.length) {
-            clearInterval(interval);
-            showResults(zip, state);
-            addTrendTicker();
-        }
-    }, 800); // 800ms per step for ~4 seconds total
+    setTimeout(() => showResults(zip, state, bill), 100);
 }
 
-function showResults(zip, state) {
+function showResults(zip, state, bill) {
     const container = document.getElementById('dynamic-results');
-    const baseSavings = getBaseSavings(state);
+    const baseSavings = getBaseSavings(state, bill);
     
     container.innerHTML = `
         <div class="bg-white rounded-xl shadow-lg border border-green-200 p-6 sm:p-8 animate-fade-in">
@@ -94,6 +133,10 @@ function showResults(zip, state) {
             <div class="relative">
                 <div id="blurred-content" class="blur-sm select-none pointer-events-none bg-slate-50 rounded-lg p-4 border border-slate-100 space-y-3">
                     <div class="flex justify-between">
+                        <span class="text-slate-600">Est. Monthly Usage</span>
+                        <span id="usage-display" class="font-bold text-slate-800">-- kWh</span>
+                    </div>
+                    <div class="flex justify-between">
                         <span class="text-slate-600">Federal Tax Credit (30%)</span>
                         <span class="font-bold text-slate-800">$${Math.round(baseSavings * 0.30).toLocaleString()}</span>
                     </div>
@@ -109,68 +152,58 @@ function showResults(zip, state) {
                 
                 <!-- The Gate -->
                 <div id="gate-overlay" class="absolute inset-0 flex flex-col items-center justify-center bg-black/10 backdrop-blur-sm rounded-lg p-4">
-                    <p class="text-sm font-bold text-slate-800 mb-1">🔒 Unlock Detailed Breakdown</p>
-                    <p class="text-xs text-slate-500 mb-4 text-center">Personalize your report based on your current energy spend.</p>
-                    
-                    <!-- Monthly Bill Slider -->
-                    <div class="w-full max-w-xs mb-3">
-                        <label class="text-xs font-bold text-slate-600 mb-1 block text-center">Avg. Monthly Electric Bill</label>
-                        <div class="flex items-center gap-3">
-                             <span class="text-xs text-slate-400">$50</span>
-                             <input type="range" id="bill-slider" min="50" max="600" value="150" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-amber-500">
-                             <span class="text-xs text-slate-400">$600+</span>
-                        </div>
-                        <div class="text-center mt-1">
-                            <span id="bill-display" class="text-sm font-bold text-amber-600">$150 / mo</span>
-                        </div>
-                    </div>
-
+                    <p class="text-sm font-bold text-slate-800 mb-1"> Get Your Full Solar Profile</p>
+                    <p class="text-xs text-slate-500 mb-3 text-center">We'll send your full breakdown report and installer list.</p>
                     <div class="flex w-full max-w-xs gap-2">
                         <input type="email" id="user-email" placeholder="email@address.com" class="flex-1 px-3 py-2 text-sm border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-500">
-                        <button id="unlock-btn" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white text-sm font-bold rounded transition">Unlock</button>
+                        <button id="unlock-btn" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white text-sm font-bold rounded transition">Send</button>
                     </div>
                 </div>
             </div>
 
             <div class="mt-6 flex gap-3">
-                <a href="/" class="flex-1 text-center bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 px-4 rounded-lg transition">Check Another Zip</a>
-                <a href="/blog/" class="flex-1 text-center bg-slate-900 hover:bg-slate-800 text-white font-bold py-3 px-4 rounded-lg transition">Read Our Guide</a>
+                <button onclick="window.location.href=window.location.pathname" class="flex-1 text-center bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 px-4 rounded-lg transition">Back</button>
+                <a href="/blog/" class="flex-1 text-center bg-slate-900 hover:bg-slate-800 text-white font-bold py-3 px-4 rounded-lg transition">Read Guide</a>
             </div>
         </div>
     `;
 
-    // Slider Logic
-    const slider = document.getElementById('bill-slider');
-    const display = document.getElementById('bill-display');
-    slider.addEventListener('input', () => {
-        let val = slider.value;
-        display.textContent = `$${val} / mo`;
-    });
+    // Usage Estimation Display
+    const rate = stateRates[state] || 0.16;
+    const usage = Math.round(bill / rate);
+    const usageDisplay = document.getElementById('usage-display');
+    if(usageDisplay) usageDisplay.textContent = `${usage} kWh / mo`;
 
-    // Add Event Listener for Unlock
+    // Unlock Listener
     document.getElementById('unlock-btn').addEventListener('click', () => {
         const email = document.getElementById('user-email').value;
-        const bill = document.getElementById('bill-slider').value;
-        
         if (email && email.includes('@')) {
-            unlockContent(email, zip, state, bill);
+            unlockContent(email, zip, state, bill, usage);
         } else {
-            document.getElementById('user-email').classList.add('border-red-500', 'ring-1', 'ring-red-500');
+            document.getElementById('user-email').classList.add('border-red-500');
         }
     });
 }
 
-function unlockContent(email, zip, state, bill) {
+function getBaseSavings(state, bill) {
+    const avgs = { 'CA': 24000, 'TX': 21000, 'FL': 19500, 'AZ': 22000, 'NY': 20000, 'CO': 18000, 'MA': 23000, 'NJ': 21500, 'US': 18500 };
+    let base = avgs[state] || avgs['US'];
+    const rate = stateRates[state] || 0.16;
+    const usage = bill / rate;
+    const usageBase = base / (150 / 0.16); // Normalizes to ~937kWh usage
+    const calculated = usageBase * usage * 25 * 0.15; // Estimated 25yr savings on usage portion
+    
+    // Mix of base and calculated for better realism
+    return Math.round(base + ((Math.random() * calculated) - calculated/2));
+}
+
+function unlockContent(email, zip, state, bill, usage) {
     const scriptUrl = "https://script.google.com/macros/s/AKfycbxp5CDO40dghD5ubQnU1XMLO0uoH0mK7i52nl_yu-6RDziolwRfRZHHTOIYiv1e-DZ3TA/exec";
     
     document.getElementById('gate-overlay').classList.add('hidden');
     document.getElementById('blurred-content').classList.remove('blur-sm', 'select-none', 'pointer-events-none');
     document.getElementById('user-email').value = '✅ Report Sent!';
-    document.getElementById('user-email').disabled = true;
-    document.getElementById('unlock-btn').textContent = 'Done';
-    document.getElementById('unlock-btn').disabled = true;
 
-    // Send lead data to Google Sheets
     fetch(scriptUrl, {
         method: "POST",
         mode: "no-cors",
@@ -178,34 +211,8 @@ function unlockContent(email, zip, state, bill) {
             email: email,
             zip: zip,
             state: state,
-            monthlyBill: bill // Slider value
+            monthlyBill: bill,
+            estUsage: usage + " kWh"
         })
-    }).then(() => console.log("Lead captured successfully"))
-      .catch(err => console.error("Lead capture failed:", err));
-}
-
-function getBaseSavings(state) {
-    const avgs = { 'CA': 24000, 'TX': 21000, 'FL': 19500, 'AZ': 22000, 'NY': 20000, 'CO': 18000, 'MA': 23000, 'NJ': 21500, 'US': 18500 };
-    const base = avgs[state] || avgs['US'];
-    const variance = base * 0.10;
-    return Math.round(base + ((Math.random() * variance * 2) - variance));
-}
-
-function addTrendTicker() {
-    const parent = document.getElementById('dynamic-results').parentElement;
-    
-    const ticker = document.createElement('div');
-    ticker.id = 'trend-ticker';
-    ticker.className = 'mt-6 bg-blue-50 border border-blue-100 rounded-lg p-3 flex items-center gap-3 text-sm text-blue-800';
-    ticker.innerHTML = `
-        <span class="animate-pulse">🔴 Live:</span>
-        <span id="ticker-text">A homeowner in <b>Texas</b> just saved <b>$18,500</b> on solar!</span>
-    `;
-    parent.appendChild(ticker);
-
-    let i = 0;
-    setInterval(() => {
-        document.getElementById('ticker-text').innerHTML = `A homeowner in <b>${trendData.states[i]}</b> just saved <b>${trendData.amounts[i]}</b> on solar!`;
-        i = (i + 1) % trendData.states.length;
-    }, 5000);
+    });
 }

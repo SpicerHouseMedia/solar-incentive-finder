@@ -1,6 +1,7 @@
 /**
  * SolarIncentiveFinder - Interactive Results & Lead Gen
- * Flow: Input (Zip+Bill) → Labor Illusion Loader → Gated Results
+ * Flow: Input (Zip+Bill) -> Labor Illusion Loader -> Gated Results
+ * UX: Spotlight Mode (Blurs static content until engagement)
  */
 
 const trendData = {
@@ -26,7 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (ticker) {
         let idx = 0;
         setInterval(() => {
-            ticker.innerHTML = `🔴 Live: <span class="font-bold">${trendData.counts[idx]} homeowners</span> in ${trendData.states[idx]} checked savings today!`;
+            ticker.innerHTML = ` Live: <span class="font-bold">${trendData.counts[idx]} homeowners</span> in ${trendData.states[idx]} checked savings today!`;
             idx = (idx + 1) % 8;
         }, 5000);
     }
@@ -40,19 +41,50 @@ document.addEventListener('DOMContentLoaded', () => {
     const stateRaw = window.location.pathname.split('/')[2];
     const state = urlParams.get('state') || (stateRaw ? stateRaw.replace('.html', '') : 'US');
 
-    // Always start at Input Step (pre-fill zip/bill if passed)
+    // Always start at Input Step (Spotlight Mode Active)
+    activateSpotlight();
     showInputStep(zip, bill, state, container);
 });
 
+// BLUR the static content below the calculator
+function activateSpotlight() {
+    // Try to find the main container to blur
+    const target = document.querySelector('main') || document.querySelector('.container') || document.querySelector('.mx-auto') || document.documentElement;
+    if (target) {
+        target.classList.add('spotlight-blur');
+        // Move the #dynamic-results container OUT of the blur
+        const container = document.getElementById('dynamic-results');
+        if (container && container.parentElement) {
+            // Ensure the container is on top
+            container.style.zIndex = '50';
+            container.style.position = 'relative';
+        }
+    }
+    // Add CSS for the blur
+    const style = document.createElement('style');
+    style.textContent = `
+        .spotlight-blur {
+            filter: blur(5px) brightness(0.7);
+            transition: filter 0.5s ease;
+        }
+        .spotlight-clear {
+            filter: none !important;
+            transition: filter 0.5s ease;
+        }
+    `;
+    document.head.appendChild(style);
+}
+
 function showInputStep(zip, bill, state, container) {
     container.innerHTML = `
-        <div class="bg-white rounded-xl shadow-lg border border-slate-200 p-6 sm:p-8 text-center">
+        <div class="bg-white rounded-xl shadow-xl border border-slate-200 p-6 sm:p-8 text-center relative z-50">
+            <div class="absolute -top-3 -right-3 bg-amber-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-sm">Customize</div>
             <h2 class="text-2xl font-bold text-slate-900 mb-2">Customize Your Solar Report</h2>
-            <p class="text-slate-500 mb-6">Adjust your monthly bill for a more accurate savings estimate.</p>
+            <p class="text-slate-500 mb-6">Adjust your bill to see your estimated savings in ${state}.</p>
             
             <div class="max-w-sm mx-auto space-y-6">
                 <div>
-                    <label class="block text-sm font-bold text-left mb-1">Zip Code</label>
+                    <label class="block text-sm font-bold text-left mb-1">Your Zip Code</label>
                     <input type="text" id="zip-input" value="${zip}" placeholder="10001" class="w-full px-4 py-3 border border-slate-300 rounded-lg text-lg focus:outline-none focus:ring-2 focus:ring-amber-500">
                 </div>
                 
@@ -68,7 +100,7 @@ function showInputStep(zip, bill, state, container) {
                     </div>
                 </div>
 
-                <button id="calculate-btn" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition shadow-md">
+                <button id="calculate-btn" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition shadow-md text-lg">
                     Calculate My Savings 
                 </button>
             </div>
@@ -85,8 +117,12 @@ function showInputStep(zip, bill, state, container) {
         const newZip = document.getElementById('zip-input').value.trim();
         const newBill = slider.value;
         if(newZip.length >= 5) {
+            // UNBLUR the page content
+            const target = document.querySelector('.spotlight-blur');
+            if (target) target.classList.replace('spotlight-blur', 'spotlight-clear');
+
             container.innerHTML = `
-                <div class="bg-white rounded-xl shadow-lg border border-green-200 p-6 sm:p-8 text-center" id="calc-loader">
+                <div class="bg-white rounded-xl shadow-xl border border-green-200 p-6 sm:p-8 text-center relative z-50" id="calc-loader">
                     <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-amber-500 mx-auto mb-4"></div>
                     <h3 class="text-lg font-bold text-slate-800">Calculating your solar savings...</h3>
                     <p class="text-amber-600 text-sm font-medium mt-2" id="calc-status">Analyzing your energy usage...</p>
@@ -96,9 +132,9 @@ function showInputStep(zip, bill, state, container) {
             // 4-Second Labor Illusion Sequence
             const statuses = [
                 "Matching zip to municipal tax records...",
-                "Checking local utility rebates in your area...",
-                "Calculating 30% Federal Tax Credit...",
-                "Estimating 25-year system savings...",
+                "Checking local utility rebates in ${state}...",
+                "Estimating roof surface area...",
+                "Calculating 25-year system savings...",
                 "Finalizing your solar report..."
             ];
             
@@ -121,11 +157,9 @@ function showInputStep(zip, bill, state, container) {
 function showResults(zip, state, bill) {
     const container = document.getElementById('dynamic-results');
     const baseSavings = getBaseSavings(state, bill);
-    const rate = stateRates[state] || 0.16;
-    const usage = Math.round(bill / rate);
     
     container.innerHTML = `
-        <div class="bg-white rounded-xl shadow-lg border border-green-200 p-6 sm:p-8 animate-fade-in">
+        <div class="bg-white rounded-xl shadow-xl border border-green-200 p-6 sm:p-8 animate-fade-in relative z-50">
             <div class="flex items-center justify-between mb-4">
                 <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold uppercase">Savings Report</span>
                 <span class="text-slate-400 text-xs">Zip: ${zip}</span>
@@ -142,15 +176,11 @@ function showResults(zip, state, bill) {
                 <div id="blurred-content" class="blur-sm select-none pointer-events-none bg-slate-50 rounded-lg p-4 border border-slate-100 space-y-3">
                     <div class="flex justify-between">
                         <span class="text-slate-600">Est. Monthly Usage</span>
-                        <span class="font-bold text-slate-800">${usage} kWh / mo</span>
+                        <span class="font-bold text-slate-800">${Math.round(bill / (stateRates[state] || 0.16))} kWh</span>
                     </div>
                     <div class="flex justify-between">
                         <span class="text-slate-600">Federal Tax Credit (30%)</span>
                         <span class="font-bold text-slate-800">$${Math.round(baseSavings * 0.30).toLocaleString()}</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-slate-600">State Tax & Rebates</span>
-                        <span class="font-bold text-slate-800">$${Math.round(baseSavings * 0.15).toLocaleString()}</span>
                     </div>
                     <div class="flex justify-between border-t border-slate-200 pt-2">
                         <span class="text-slate-800 font-bold">Total Benefit</span>
@@ -159,8 +189,8 @@ function showResults(zip, state, bill) {
                 </div>
                 
                 <!-- The Gate -->
-                <div id="gate-overlay" class="absolute inset-0 flex flex-col items-center justify-center bg-black/10 backdrop-blur-sm rounded-lg p-4">
-                    <p class="text-sm font-bold text-slate-800 mb-1"> Get Your Full Solar Profile</p>
+                <div id="gate-overlay" class="absolute inset-0 flex flex-col items-center justify-center bg-white/90 backdrop-blur-sm rounded-lg p-4 border border-dashed border-amber-500">
+                    <p class="text-sm font-bold text-slate-800 mb-1">✨ Get Your Full Solar Profile</p>
                     <p class="text-xs text-slate-500 mb-3 text-center">We'll send your full breakdown report and installer list.</p>
                     <div class="flex w-full max-w-xs gap-2">
                         <input type="email" id="user-email" placeholder="email@address.com" class="flex-1 px-3 py-2 text-sm border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-500">
@@ -170,7 +200,7 @@ function showResults(zip, state, bill) {
             </div>
 
             <div class="mt-6 flex gap-3">
-                <button onclick="window.history.back()" class="flex-1 text-center bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 px-4 rounded-lg transition">Back</button>
+                <button onclick="window.location.href=window.location.pathname" class="flex-1 text-center bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 px-4 rounded-lg transition">Back</button>
                 <a href="/blog/" class="flex-1 text-center bg-slate-900 hover:bg-slate-800 text-white font-bold py-3 px-4 rounded-lg transition">Read Guide</a>
             </div>
         </div>
@@ -180,7 +210,7 @@ function showResults(zip, state, bill) {
     document.getElementById('unlock-btn').addEventListener('click', () => {
         const email = document.getElementById('user-email').value;
         if (email && email.includes('@')) {
-            unlockContent(email, zip, state, bill, usage);
+            unlockContent(email, zip, state, bill);
         } else {
             document.getElementById('user-email').classList.add('border-red-500');
         }
@@ -191,13 +221,11 @@ function getBaseSavings(state, bill) {
     const avgs = { 'CA': 24000, 'TX': 21000, 'FL': 19500, 'AZ': 22000, 'NY': 20000, 'CO': 18000, 'MA': 23000, 'NJ': 21500, 'US': 18500 };
     let base = avgs[state] || avgs['US'];
     const rate = stateRates[state] || 0.16;
-    const usage = bill / rate;
-    // Adjust base savings based on bill vs national avg (~$150)
     const multiplier = bill / 150; 
     return Math.round(base * multiplier);
 }
 
-function unlockContent(email, zip, state, bill, usage) {
+function unlockContent(email, zip, state, bill) {
     const scriptUrl = "https://script.google.com/macros/s/AKfycbxp5CDO40dghD5ubQnU1XMLO0uoH0mK7i52nl_yu-6RDziolwRfRZHHTOIYiv1e-DZ3TA/exec";
     
     document.getElementById('gate-overlay').classList.add('hidden');
@@ -211,8 +239,7 @@ function unlockContent(email, zip, state, bill, usage) {
             email: email,
             zip: zip,
             state: state,
-            monthlyBill: bill,
-            estUsage: usage + " kWh"
+            monthlyBill: bill
         })
     });
 }

@@ -11,13 +11,13 @@ const trendData = {
 };
 
 // Avg $/kWh by State (EIA Data)
-const stateRates = { 
-    'AL': 0.13, 'AK': 0.24, 'AZ': 0.14, 'AR': 0.11, 'CA': 0.28, 'CO': 0.13, 'CT': 0.30, 'DE': 0.15, 
-    'FL': 0.14, 'GA': 0.12, 'HI': 0.44, 'ID': 0.10, 'IL': 0.14, 'IN': 0.14, 'IA': 0.13, 'KS': 0.12, 
-    'KY': 0.12, 'LA': 0.11, 'ME': 0.25, 'MD': 0.16, 'MA': 0.28, 'MI': 0.17, 'MN': 0.14, 'MS': 0.11, 
-    'MO': 0.11, 'MT': 0.11, 'NE': 0.10, 'NV': 0.13, 'NH': 0.24, 'NJ': 0.18, 'NM': 0.13, 'NY': 0.22, 
-    'NC': 0.12, 'ND': 0.10, 'OH': 0.14, 'OK': 0.11, 'OR': 0.11, 'PA': 0.15, 'RI': 0.26, 'SC': 0.12, 
-    'SD': 0.11, 'TN': 0.11, 'TX': 0.13, 'UT': 0.11, 'VT': 0.21, 'VA': 0.12, 'WA': 0.10, 'WV': 0.11, 
+const stateRates = {
+    'AL': 0.13, 'AK': 0.24, 'AZ': 0.14, 'AR': 0.11, 'CA': 0.28, 'CO': 0.13, 'CT': 0.30, 'DE': 0.15,
+    'FL': 0.14, 'GA': 0.12, 'HI': 0.44, 'ID': 0.10, 'IL': 0.14, 'IN': 0.14, 'IA': 0.13, 'KS': 0.12,
+    'KY': 0.12, 'LA': 0.11, 'ME': 0.25, 'MD': 0.16, 'MA': 0.28, 'MI': 0.17, 'MN': 0.14, 'MS': 0.11,
+    'MO': 0.11, 'MT': 0.11, 'NE': 0.10, 'NV': 0.13, 'NH': 0.24, 'NJ': 0.18, 'NM': 0.13, 'NY': 0.22,
+    'NC': 0.12, 'ND': 0.10, 'OH': 0.14, 'OK': 0.11, 'OR': 0.11, 'PA': 0.15, 'RI': 0.26, 'SC': 0.12,
+    'SD': 0.11, 'TN': 0.11, 'TX': 0.13, 'UT': 0.11, 'VT': 0.21, 'VA': 0.12, 'WA': 0.10, 'WV': 0.11,
     'WI': 0.16, 'WY': 0.10, 'US': 0.16
 };
 
@@ -53,9 +53,15 @@ document.addEventListener('DOMContentLoaded', () => {
 function activateSpotlight(container) {
     const style = document.createElement('style');
     style.textContent = `
+        /* Safety: NEVER blur #dynamic-results or its children */
+        #dynamic-results, #dynamic-results * {
+            filter: none !important;
+            opacity: 1 !important;
+        }
+        /* Heavy lock on sibling content — totally unreadable, must email */
         .spotlight-blur-sib {
-            filter: blur(5px) brightness(0.8);
-            opacity: 0.7;
+            filter: blur(12px) brightness(0.7) grayscale(0.4);
+            opacity: 0.35;
             pointer-events: none;
             transition: all 0.6s ease;
         }
@@ -65,12 +71,24 @@ function activateSpotlight(container) {
             pointer-events: auto !important;
             transition: all 0.6s ease;
         }
-        /* Safety: NEVER blur #dynamic-results or its children */
-        #dynamic-results, #dynamic-results * {
-            filter: none !important;
-            opacity: 1 !important;
+        /* Centered "Unlock" badge over blurred content */
+        .lock-badge {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 5;
+            background: rgba(0,0,0,0.85);
+            color: white;
+            font-size: 0.85rem;
+            font-weight: 700;
+            padding: 0.6rem 1.2rem;
+            border-radius: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            white-space: nowrap;
         }
-
         /* === CONVERSION ANIMATIONS === */
         @keyframes subtle-pulse {
             0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.35); }
@@ -90,6 +108,14 @@ function activateSpotlight(container) {
     while (sibling) {
         if (sibling.nodeType === 1) { // Element nodes only
             sibling.classList.add('spotlight-blur-sib');
+            // Add lock badge overlay to main content area
+            if (sibling.tagName === 'MAIN' || sibling.querySelector('main')) {
+                sibling.style.position = 'relative';
+                const badge = document.createElement('div');
+                badge.className = 'lock-badge';
+                badge.innerHTML = '🔒 Unlock Full Breakdown';
+                sibling.appendChild(badge);
+            }
         }
         sibling = sibling.nextElementSibling;
     }
@@ -101,13 +127,13 @@ function showInputStep(zip, bill, state, container) {
             <div class="absolute -top-3 -right-3 bg-amber-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-sm">Customize</div>
             <h2 class="text-2xl font-bold text-slate-900 mb-2">Customize Your Solar Report</h2>
             <p class="text-slate-500 mb-6">Adjust your bill to see your estimated savings in ${state}.</p>
-            
+
             <div class="max-w-sm mx-auto space-y-6">
                 <div>
                     <label class="block text-sm font-bold text-left mb-1">Your Zip Code</label>
                     <input type="text" id="zip-input" value="${zip}" placeholder="10001" class="w-full px-4 py-3 border border-slate-300 rounded-lg text-lg focus:outline-none focus:ring-2 focus:ring-amber-500">
                 </div>
-                
+
                 <div>
                     <label class="block text-sm font-bold text-left mb-1">Avg. Monthly Electric Bill</label>
                     <div class="flex items-center gap-3 mb-2">
@@ -121,7 +147,7 @@ function showInputStep(zip, bill, state, container) {
                 </div>
 
                 <button id="calculate-btn" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition shadow-md text-lg">
-                    Calculate My Savings 
+                    Calculate My Savings
                 </button>
             </div>
         </div>
@@ -135,7 +161,6 @@ function showInputStep(zip, bill, state, container) {
         const newZip = document.getElementById('zip-input').value.trim();
         const newBill = slider.value;
         if(newZip.length >= 5) {
-            // Unblur happens AFTER the calculating animation finishes (in showResults)
 
             container.innerHTML = `
                 <div class="bg-white rounded-xl shadow-xl border border-green-200 p-6 sm:p-8 text-center" id="calc-loader">
@@ -152,7 +177,7 @@ function showInputStep(zip, bill, state, container) {
                 "Calculating 25-year system savings...",
                 "Finalizing your solar report..."
             ];
-            
+
             let step = 0;
             const interval = setInterval(() => {
                 const statusEl = document.getElementById('calc-status');
@@ -173,26 +198,27 @@ function showResults(zip, state, bill) {
     // Clear the blur on siblings — timed with spinner finish
     const blurred = document.querySelectorAll('.spotlight-blur-sib');
     blurred.forEach(el => el.classList.replace('spotlight-blur-sib', 'spotlight-clear-sib'));
+    // Remove lock badge
+    const lockBadges = document.querySelectorAll('.lock-badge');
+    lockBadges.forEach(b => b.remove());
 
     const container = document.getElementById('dynamic-results');
     const baseSavings = getBaseSavings(state, bill);
-    
+
     container.innerHTML = `
         <div class="bg-white rounded-xl shadow-xl border border-green-200 p-6 sm:p-8 animate-fade-in">
             <div class="flex items-center justify-between mb-4">
                 <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold uppercase">Savings Report</span>
                 <span class="text-slate-400 text-xs">Zip: ${zip}</span>
             </div>
-            
+
             <h2 class="text-2xl font-bold text-slate-900 mb-2">Your Estimated Savings:</h2>
             <div class="mt-2 mb-6">
                 <span class="text-4xl sm:text-5xl font-extrabold text-green-600">$${baseSavings.toLocaleString()}</span>
-                <!-- REMOVED: "over 25 years" — shrinks perceived value. Let the number stand as the hero. -->
             </div>
 
             <div class="relative">
                 <div id="blurred-content" class="blur-sm select-none pointer-events-none bg-slate-50 rounded-lg p-4 border border-slate-100 space-y-3">
-                    <!-- REMOVED: Est. Monthly Usage line — reduces curiosity when over-explained -->
                     <div class="flex justify-between">
                         <span class="text-slate-600">Federal Tax Credit (30%)</span>
                         <span class="font-bold text-slate-800">$${Math.round(baseSavings * 0.30).toLocaleString()}</span>
@@ -202,9 +228,9 @@ function showResults(zip, state, bill) {
                         <span class="font-bold text-green-600">$${baseSavings.toLocaleString()}</span>
                     </div>
                 </div>
-                
+
                 <div id="gate-overlay" class="absolute inset-0 flex flex-col items-center justify-center bg-white/95 backdrop-blur-sm rounded-lg p-6 subtle-pulse slide-in-up">
-                    <p class="text-lg font-bold text-slate-900 mb-1"> Unlock Your <span class="text-amber-600">$${baseSavings.toLocaleString()}</span> Report</p>
+                    <p class="text-lg font-bold text-slate-900 mb-1">🔓 Unlock Your <span class="text-amber-600">$${baseSavings.toLocaleString()}</span> Report</p>
                     <p class="text-xs text-slate-500 mb-5">We'll email your full solar breakdown + installer list for zip <strong>${zip}</strong></p>
                     <div class="flex w-full max-w-sm gap-2">
                         <input type="email" id="user-email" placeholder="your@email.com" class="flex-1 px-4 py-2.5 text-sm border-2 border-amber-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 font-medium">
@@ -215,7 +241,6 @@ function showResults(zip, state, bill) {
 
             <div class="mt-6 flex gap-3">
                 <button onclick="window.location.href=window.location.pathname" class="flex-1 text-center bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 px-4 rounded-lg transition">Back</button>
-                <!-- TODO: Update to /blog/2026-solar-guide/ when guide post is built -->
                 <a href="/blog/2026-solar-guide/" class="flex-1 text-center bg-slate-900 hover:bg-slate-800 text-white font-bold py-3 px-4 rounded-lg transition">Read Our Guide</a>
             </div>
         </div>
@@ -234,20 +259,19 @@ function showResults(zip, state, bill) {
 function getBaseSavings(state, bill) {
     const avgs = { 'CA': 24000, 'TX': 21000, 'FL': 19500, 'AZ': 22000, 'NY': 20000, 'CO': 18000, 'MA': 23000, 'NJ': 21500, 'US': 18500 };
     let base = avgs[state] || avgs['US'];
-    const multiplier = bill / 150; 
+    const multiplier = bill / 150;
     return Math.round(base * multiplier);
 }
 
 function unlockContent(email, zip, state, bill) {
     const scriptUrl = "https://script.google.com/macros/s/AKfycbxp5CDO40dghD5ubQnU1XMLO0uoH0mK7i52nl_yu-6RDziolwRfRZHHTOIYiv1e-DZ3TA/exec";
-    
+
     const gate = document.getElementById('gate-overlay');
     if (gate) gate.remove();
     const blurred = document.getElementById('blurred-content');
     if (blurred) blurred.classList.remove('blur-sm', 'select-none', 'pointer-events-none');
-    
-    // Show success state in the overlay's place
-    const resultsContainer = document.getElementById('dynamic-results');
+
+    // Show success
     const btn = document.createElement('div');
     btn.className = 'bg-green-50 border border-green-300 rounded-lg p-3 text-center mt-4 slide-in-up';
     btn.innerHTML = '<p class="text-sm font-bold text-green-700">✅ Full report sent to ' + email + '! Check your inbox.</p>';

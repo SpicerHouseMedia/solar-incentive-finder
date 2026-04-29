@@ -1,7 +1,7 @@
 /**
  * SolarIncentiveFinder - Interactive Results & Lead Gen
  * Flow: Input (Zip+Bill) -> Labor Illusion Loader -> Gated Results
- * UX: Spotlight Mode (Blurs static content until engagement)
+ * UX: Spotlight Mode (Blurs everything except the calculator)
  */
 
 const trendData = {
@@ -22,7 +22,6 @@ const stateRates = {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Ticker
     const ticker = document.getElementById('live-ticker');
     if (ticker) {
         let idx = 0;
@@ -41,44 +40,46 @@ document.addEventListener('DOMContentLoaded', () => {
     const stateRaw = window.location.pathname.split('/')[2];
     const state = urlParams.get('state') || (stateRaw ? stateRaw.replace('.html', '') : 'US');
 
-    // Always start at Input Step (Spotlight Mode Active)
-    activateSpotlight();
+    activateSpotlight(container);
     showInputStep(zip, bill, state, container);
 });
 
-// BLUR the static content below the calculator
-function activateSpotlight() {
-    // Try to find the main container to blur
-    const target = document.querySelector('main') || document.querySelector('.container') || document.querySelector('.mx-auto') || document.documentElement;
-    if (target) {
-        target.classList.add('spotlight-blur');
-        // Move the #dynamic-results container OUT of the blur
-        const container = document.getElementById('dynamic-results');
-        if (container && container.parentElement) {
-            // Ensure the container is on top
-            container.style.zIndex = '50';
-            container.style.position = 'relative';
-        }
-    }
-    // Add CSS for the blur
+// Spotlight: Blur everything in main content, EXCEPT the calculator
+function activateSpotlight(container) {
     const style = document.createElement('style');
     style.textContent = `
-        .spotlight-blur {
-            filter: blur(5px) brightness(0.7);
+        .spotlight-blur-mode main, 
+        .spotlight-blur-mode .container, 
+        .spotlight-blur-mode .content-wrapper {
+            filter: blur(6px);
             transition: filter 0.5s ease;
         }
-        .spotlight-clear {
+        .spotlight-blur-mode #dynamic-results, 
+        .spotlight-blur-mode #dynamic-results * {
+            filter: none !important;
+        }
+        .spotlight-clear-mode main, 
+        .spotlight-clear-mode .container, 
+        .spotlight-clear-mode .content-wrapper {
             filter: none !important;
             transition: filter 0.5s ease;
         }
+        #dynamic-results {
+            position: relative;
+            z-index: 50;
+        }
     `;
     document.head.appendChild(style);
+
+    // Find the root content wrapper to blur
+    const wrapper = document.querySelector('main') || document.querySelector('.container') || document.querySelector('.content-wrapper') || document.body;
+    if (wrapper) wrapper.classList.add('spotlight-blur-mode');
 }
 
 function showInputStep(zip, bill, state, container) {
     container.innerHTML = `
-        <div class="bg-white rounded-xl shadow-xl border border-slate-200 p-6 sm:p-8 text-center relative z-50">
-            <div class="absolute -top-3 -right-3 bg-amber-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-sm">Customize</div>
+        <div class="bg-white rounded-xl shadow-xl border border-slate-200 p-6 sm:p-8 text-center">
+            <div class="absolute -top-3 -right-3 bg-amber-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-sm z-[60]">Customize</div>
             <h2 class="text-2xl font-bold text-slate-900 mb-2">Customize Your Solar Report</h2>
             <p class="text-slate-500 mb-6">Adjust your bill to see your estimated savings in ${state}.</p>
             
@@ -107,29 +108,26 @@ function showInputStep(zip, bill, state, container) {
         </div>
     `;
 
-    // Slider Logic
     const slider = document.getElementById('bill-slider');
     const display = document.getElementById('bill-display');
     slider.addEventListener('input', () => display.textContent = `$${slider.value} / mo`);
 
-    // Calculate Button Logic
     document.getElementById('calculate-btn').addEventListener('click', () => {
         const newZip = document.getElementById('zip-input').value.trim();
         const newBill = slider.value;
         if(newZip.length >= 5) {
-            // UNBLUR the page content
-            const target = document.querySelector('.spotlight-blur');
-            if (target) target.classList.replace('spotlight-blur', 'spotlight-clear');
+            // Clear the blur
+            document.documentElement.classList.remove('spotlight-blur-mode');
+            document.documentElement.classList.add('spotlight-clear-mode');
 
             container.innerHTML = `
-                <div class="bg-white rounded-xl shadow-xl border border-green-200 p-6 sm:p-8 text-center relative z-50" id="calc-loader">
+                <div class="bg-white rounded-xl shadow-xl border border-green-200 p-6 sm:p-8 text-center" id="calc-loader">
                     <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-amber-500 mx-auto mb-4"></div>
                     <h3 class="text-lg font-bold text-slate-800">Calculating your solar savings...</h3>
                     <p class="text-amber-600 text-sm font-medium mt-2" id="calc-status">Analyzing your energy usage...</p>
                 </div>
             `;
 
-            // 4-Second Labor Illusion Sequence
             const statuses = [
                 "Matching zip to municipal tax records...",
                 "Checking local utility rebates in ${state}...",
@@ -159,7 +157,7 @@ function showResults(zip, state, bill) {
     const baseSavings = getBaseSavings(state, bill);
     
     container.innerHTML = `
-        <div class="bg-white rounded-xl shadow-xl border border-green-200 p-6 sm:p-8 animate-fade-in relative z-50">
+        <div class="bg-white rounded-xl shadow-xl border border-green-200 p-6 sm:p-8 animate-fade-in">
             <div class="flex items-center justify-between mb-4">
                 <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold uppercase">Savings Report</span>
                 <span class="text-slate-400 text-xs">Zip: ${zip}</span>
@@ -171,7 +169,6 @@ function showResults(zip, state, bill) {
                 <span class="text-slate-500 ml-2">over 25 years</span>
             </div>
 
-            <!-- The Gated Section -->
             <div class="relative">
                 <div id="blurred-content" class="blur-sm select-none pointer-events-none bg-slate-50 rounded-lg p-4 border border-slate-100 space-y-3">
                     <div class="flex justify-between">
@@ -188,7 +185,6 @@ function showResults(zip, state, bill) {
                     </div>
                 </div>
                 
-                <!-- The Gate -->
                 <div id="gate-overlay" class="absolute inset-0 flex flex-col items-center justify-center bg-white/90 backdrop-blur-sm rounded-lg p-4 border border-dashed border-amber-500">
                     <p class="text-sm font-bold text-slate-800 mb-1">✨ Get Your Full Solar Profile</p>
                     <p class="text-xs text-slate-500 mb-3 text-center">We'll send your full breakdown report and installer list.</p>
@@ -206,7 +202,6 @@ function showResults(zip, state, bill) {
         </div>
     `;
 
-    // Unlock Listener
     document.getElementById('unlock-btn').addEventListener('click', () => {
         const email = document.getElementById('user-email').value;
         if (email && email.includes('@')) {

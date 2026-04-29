@@ -1,11 +1,6 @@
 /**
  * SolarIncentiveFinder - Interactive Results & Lead Gen
- * Features:
- * 1. Pre-Loader Step: Zip + Bill Input
- * 2. Labor Illusion Loader
- * 3. Smart Usage Estimation (Bill -> kWh)
- * 4. Gated Results (Email Capture)
- * 5. Trend Ticker
+ * Flow: Input (Zip+Bill) → Labor Illusion Loader → Gated Results
  */
 
 const trendData = {
@@ -14,7 +9,7 @@ const trendData = {
     amounts: ['$18,500', '$15,200', '$22,100', '$19,000', '$12,400', '$16,800', '$14,900', '$24,500']
 };
 
-// Average $/kWh by State (US EIA Data approx.)
+// Avg $/kWh by State (EIA Data)
 const stateRates = { 
     'AL': 0.13, 'AK': 0.24, 'AZ': 0.14, 'AR': 0.11, 'CA': 0.28, 'CO': 0.13, 'CT': 0.30, 'DE': 0.15, 
     'FL': 0.14, 'GA': 0.12, 'HI': 0.44, 'ID': 0.10, 'IL': 0.14, 'IN': 0.14, 'IA': 0.13, 'KS': 0.12, 
@@ -26,6 +21,7 @@ const stateRates = {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Ticker
     const ticker = document.getElementById('live-ticker');
     if (ticker) {
         let idx = 0;
@@ -40,23 +36,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const urlParams = new URLSearchParams(window.location.search);
     const zip = urlParams.get('zip') || '';
-    const bill = urlParams.get('bill') || '150'; // Default $150
-    const state = urlParams.get('state') || window.location.pathname.split('/')[2]?.replace('.html', '') || 'US';
+    const bill = urlParams.get('bill') || '150';
+    const stateRaw = window.location.pathname.split('/')[2];
+    const state = urlParams.get('state') || (stateRaw ? stateRaw.replace('.html', '') : 'US');
 
-    if (!zip) {
-        showInputStep(zip, state, bill, container);
-    } else {
-        runInteractiveResults(zip, state, bill);
-    }
+    // Always start at Input Step (pre-fill zip/bill if passed)
+    showInputStep(zip, bill, state, container);
 });
 
-function showInputStep(zip, state, bill, container) {
-    const stateFull = state; // e.g. 'CA'
-
+function showInputStep(zip, bill, state, container) {
     container.innerHTML = `
         <div class="bg-white rounded-xl shadow-lg border border-slate-200 p-6 sm:p-8 text-center">
-            <h2 class="text-2xl font-bold text-slate-900 mb-2">Calculate Your Solar Savings</h2>
-            <p class="text-slate-500 mb-6">Get a custom savings report for ${stateFull} in 10 seconds.</p>
+            <h2 class="text-2xl font-bold text-slate-900 mb-2">Customize Your Solar Report</h2>
+            <p class="text-slate-500 mb-6">Adjust your monthly bill for a more accurate savings estimate.</p>
             
             <div class="max-w-sm mx-auto space-y-6">
                 <div>
@@ -77,44 +69,60 @@ function showInputStep(zip, state, bill, container) {
                 </div>
 
                 <button id="calculate-btn" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition shadow-md">
-                    Show My Savings 
+                    Calculate My Savings 
                 </button>
             </div>
         </div>
     `;
 
+    // Slider Logic
     const slider = document.getElementById('bill-slider');
     const display = document.getElementById('bill-display');
     slider.addEventListener('input', () => display.textContent = `$${slider.value} / mo`);
 
+    // Calculate Button Logic
     document.getElementById('calculate-btn').addEventListener('click', () => {
-        const newZip = document.getElementById('zip-input').value;
+        const newZip = document.getElementById('zip-input').value.trim();
         const newBill = slider.value;
         if(newZip.length >= 5) {
-            const target = window.location.pathname + '?zip=' + newZip + '&bill=' + newBill + '&state=' + stateFull;
-            window.location.replace(target);
+            container.innerHTML = `
+                <div class="bg-white rounded-xl shadow-lg border border-green-200 p-6 sm:p-8 text-center" id="calc-loader">
+                    <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-amber-500 mx-auto mb-4"></div>
+                    <h3 class="text-lg font-bold text-slate-800">Calculating your solar savings...</h3>
+                    <p class="text-amber-600 text-sm font-medium mt-2" id="calc-status">Analyzing your energy usage...</p>
+                </div>
+            `;
+
+            // 4-Second Labor Illusion Sequence
+            const statuses = [
+                "Matching zip to municipal tax records...",
+                "Checking local utility rebates in your area...",
+                "Calculating 30% Federal Tax Credit...",
+                "Estimating 25-year system savings...",
+                "Finalizing your solar report..."
+            ];
+            
+            let step = 0;
+            const interval = setInterval(() => {
+                const statusEl = document.getElementById('calc-status');
+                if(statusEl) statusEl.textContent = statuses[step];
+                step++;
+                if (step >= statuses.length) {
+                    clearInterval(interval);
+                    showResults(newZip, state, newBill);
+                }
+            }, 800);
         } else {
             document.getElementById('zip-input').classList.add('border-red-500');
         }
     });
 }
 
-function runInteractiveResults(zip, state, bill) {
-    const container = document.getElementById('dynamic-results');
-    container.innerHTML = `
-        <div class="bg-white rounded-xl shadow-lg border border-green-200 p-6 sm:p-8 text-center" id="calc-loader">
-            <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-amber-500 mx-auto mb-4"></div>
-            <h3 class="text-lg font-bold text-slate-800">Calculating your solar savings...</h3>
-            <p class="text-amber-600 text-sm font-medium mt-2" id="calc-status">Analyzing your energy usage...</p>
-        </div>
-    `;
-
-    setTimeout(() => showResults(zip, state, bill), 100);
-}
-
 function showResults(zip, state, bill) {
     const container = document.getElementById('dynamic-results');
     const baseSavings = getBaseSavings(state, bill);
+    const rate = stateRates[state] || 0.16;
+    const usage = Math.round(bill / rate);
     
     container.innerHTML = `
         <div class="bg-white rounded-xl shadow-lg border border-green-200 p-6 sm:p-8 animate-fade-in">
@@ -134,7 +142,7 @@ function showResults(zip, state, bill) {
                 <div id="blurred-content" class="blur-sm select-none pointer-events-none bg-slate-50 rounded-lg p-4 border border-slate-100 space-y-3">
                     <div class="flex justify-between">
                         <span class="text-slate-600">Est. Monthly Usage</span>
-                        <span id="usage-display" class="font-bold text-slate-800">-- kWh</span>
+                        <span class="font-bold text-slate-800">${usage} kWh / mo</span>
                     </div>
                     <div class="flex justify-between">
                         <span class="text-slate-600">Federal Tax Credit (30%)</span>
@@ -162,17 +170,11 @@ function showResults(zip, state, bill) {
             </div>
 
             <div class="mt-6 flex gap-3">
-                <button onclick="window.location.href=window.location.pathname" class="flex-1 text-center bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 px-4 rounded-lg transition">Back</button>
+                <button onclick="window.history.back()" class="flex-1 text-center bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 px-4 rounded-lg transition">Back</button>
                 <a href="/blog/" class="flex-1 text-center bg-slate-900 hover:bg-slate-800 text-white font-bold py-3 px-4 rounded-lg transition">Read Guide</a>
             </div>
         </div>
     `;
-
-    // Usage Estimation Display
-    const rate = stateRates[state] || 0.16;
-    const usage = Math.round(bill / rate);
-    const usageDisplay = document.getElementById('usage-display');
-    if(usageDisplay) usageDisplay.textContent = `${usage} kWh / mo`;
 
     // Unlock Listener
     document.getElementById('unlock-btn').addEventListener('click', () => {
@@ -190,11 +192,9 @@ function getBaseSavings(state, bill) {
     let base = avgs[state] || avgs['US'];
     const rate = stateRates[state] || 0.16;
     const usage = bill / rate;
-    const usageBase = base / (150 / 0.16); // Normalizes to ~937kWh usage
-    const calculated = usageBase * usage * 25 * 0.15; // Estimated 25yr savings on usage portion
-    
-    // Mix of base and calculated for better realism
-    return Math.round(base + ((Math.random() * calculated) - calculated/2));
+    // Adjust base savings based on bill vs national avg (~$150)
+    const multiplier = bill / 150; 
+    return Math.round(base * multiplier);
 }
 
 function unlockContent(email, zip, state, bill, usage) {

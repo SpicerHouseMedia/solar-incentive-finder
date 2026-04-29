@@ -123,9 +123,7 @@ function showInputStep(zip, bill, state, container) {
         const newZip = document.getElementById('zip-input').value.trim();
         const newBill = slider.value;
         if(newZip.length >= 5) {
-            // Clear the blur on siblings
-            const blurred = document.querySelectorAll('.spotlight-blur-sib');
-            blurred.forEach(el => el.classList.replace('spotlight-blur-sib', 'spotlight-clear-sib'));
+            // Unblur happens AFTER the calculating animation finishes (in showResults)
 
             container.innerHTML = `
                 <div class="bg-white rounded-xl shadow-xl border border-green-200 p-6 sm:p-8 text-center" id="calc-loader">
@@ -160,6 +158,10 @@ function showInputStep(zip, bill, state, container) {
 }
 
 function showResults(zip, state, bill) {
+    // Clear the blur on siblings — timed with spinner finish
+    const blurred = document.querySelectorAll('.spotlight-blur-sib');
+    blurred.forEach(el => el.classList.replace('spotlight-blur-sib', 'spotlight-clear-sib'));
+
     const container = document.getElementById('dynamic-results');
     const baseSavings = getBaseSavings(state, bill);
     

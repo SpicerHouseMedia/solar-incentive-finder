@@ -1,7 +1,7 @@
 /**
  * SolarIncentiveFinder - Interactive Results & Lead Gen
  * Flow: Input (Zip+Bill) -> Labor Illusion Loader -> Gated Results
- * UX: Spotlight Mode (Blurs incentive content below, calculator stays sharp. Unblurs AFTER calculation).
+ * UX: CSS Spotlight Mode (Blurs all siblings via stylesheet, reveals on Calculate)
  */
 
 const trendData = {
@@ -40,48 +40,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const stateRaw = window.location.pathname.split('/')[2];
     const state = urlParams.get('state') || (stateRaw ? stateRaw.replace('.html', '') : 'US');
 
-    // Ensure #dynamic-results never inherits blur
-    container.style.filter = 'none';
-    container.style.position = 'relative';
-    container.style.zIndex = '10';
-
-    activateSpotlight(container);
-    showInputStep(zip, bill, state, container);
-});
-
-// Blur ONLY the sibling content blocks below #dynamic-results
-function activateSpotlight(container) {
+    // 1. Inject Spotlight CSS Rule (Blurs everything after #dynamic-results)
     const style = document.createElement('style');
-    style.textContent = `
-        .spotlight-blur-sib {
-            filter: blur(5px) brightness(0.8);
-            opacity: 0.7;
-            pointer-events: none;
-            transition: all 0.6s ease;
-        }
-        .spotlight-clear-sib {
-            filter: none !important;
-            opacity: 1 !important;
-            pointer-events: auto !important;
-            transition: all 0.6s ease;
-        }
-        /* Safety: NEVER blur #dynamic-results or its children */
-        #dynamic-results, #dynamic-results * {
-            filter: none !important;
-            opacity: 1 !important;
-        }
-    `;
+    style.id = 'spotlight-style';
+    style.textContent = '#dynamic-results ~ * { filter: blur(5px) brightness(0.8); opacity: 0.7; pointer-events: none; transition: all 0.6s ease; }';
     document.head.appendChild(style);
 
-    // Target every element sibling after #dynamic-results
-    let sibling = container.nextElementSibling;
-    while (sibling) {
-        if (sibling.nodeType === 1) { // Element nodes only
-            sibling.classList.add('spotlight-blur-sib');
-        }
-        sibling = sibling.nextElementSibling;
-    }
-}
+    // 2. Ensure container is sharp
+    container.style.filter = 'none';
+    container.style.opacity = '1';
+    container.style.pointerEvents = 'auto';
+    container.style.zIndex = '10';
+
+    showInputStep(zip, bill, state, container);
+});
 
 function showInputStep(zip, bill, state, container) {
     container.innerHTML = `
@@ -123,8 +95,10 @@ function showInputStep(zip, bill, state, container) {
         const newZip = document.getElementById('zip-input').value.trim();
         const newBill = slider.value;
         if(newZip.length >= 5) {
-            // BLUR stays active here while loading...
-            
+            // UPDATE the CSS rule to UNBLUR (Smooth Transition)
+            const styleEl = document.getElementById('spotlight-style');
+            if(styleEl) styleEl.textContent = '#dynamic-results ~ * { filter: none; opacity: 1; pointer-events: auto; transition: all 0.6s ease; }';
+
             container.innerHTML = `
                 <div class="bg-white rounded-xl shadow-xl border border-green-200 p-6 sm:p-8 text-center" id="calc-loader">
                     <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-amber-500 mx-auto mb-4"></div>
@@ -148,11 +122,6 @@ function showInputStep(zip, bill, state, container) {
                 step++;
                 if (step >= statuses.length) {
                     clearInterval(interval);
-                    
-                    // NOW clear the blur on siblings
-                    const blurred = document.querySelectorAll('.spotlight-blur-sib');
-                    blurred.forEach(el => el.classList.replace('spotlight-blur-sib', 'spotlight-clear-sib'));
-                    
                     showResults(newZip, state, newBill);
                 }
             }, 800);

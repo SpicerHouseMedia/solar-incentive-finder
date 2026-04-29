@@ -290,7 +290,7 @@ function getBaseSavings(state, bill) {
 }
 
 function unlockContent(email, zip, state, bill) {
-    const scriptUrl = "https://script.google.com/macros/s/AKfycbyKIPIYV7GHzIhNwiEyVaikFLtcfpKFoCBPtMeUbJ9yFbjI6ghS2RfFWd9SwEk3afipag/exec";
+    const workerUrl = "https://email-sender.joe-13c.workers.dev";
     
     // REMOVE the gate overlay from inside the card
     const gate = document.getElementById('gate-overlay');
@@ -315,14 +315,15 @@ function unlockContent(email, zip, state, bill) {
     btn.innerHTML = `<p class="text-sm font-bold text-green-700">✅ Full report sent to ${email}! Check your inbox.</p>`;
     blurred.parentElement.appendChild(btn);
 
-    fetch(scriptUrl, {
+    fetch(workerUrl, {
         method: "POST",
-        mode: "no-cors",
         body: JSON.stringify({
             email: email,
             zip: zip,
             state: state,
             monthlyBill: bill
         })
-    });
+    }).then(res => res.json()).then(data => {
+        console.log("Email sent:", data);
+    }).catch(err => console.error("Email failed:", err));
 }

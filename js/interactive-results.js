@@ -72,26 +72,16 @@ function activateSpotlight(container) {
         }
 
         /* === CONVERSION ANIMATIONS === */
-        @keyframes pulse-glow {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.5), 0 0 20px rgba(245, 158, 11, 0.2); }
-            50% { box-shadow: 0 0 0 12px rgba(245, 158, 11, 0), 0 0 40px rgba(245, 158, 11, 0.3); }
-        }
-        @keyframes bounce-arrow {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-6px); }
-        }
-        @keyframes urgent-pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
+        @keyframes subtle-pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.35); }
+            50% { box-shadow: 0 0 0 8px rgba(245, 158, 11, 0); }
         }
         @keyframes slide-in-up {
-            from { opacity: 0; transform: translateY(20px); }
+            from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        .pulse-glow { animation: pulse-glow 2s ease-in-out infinite; }
-        .bounce-arrow { animation: bounce-arrow 1.2s ease-in-out infinite; }
-        .urgent-pulse { animation: urgent-pulse 1.5s ease-in-out infinite; }
-        .slide-in-up { animation: slide-in-up 0.5s ease-out forwards; }
+        .subtle-pulse { animation: subtle-pulse 2.5s ease-in-out infinite; }
+        .slide-in-up { animation: slide-in-up 0.4s ease-out forwards; }
     `;
     document.head.appendChild(style);
 
@@ -216,29 +206,13 @@ function showResults(zip, state, bill) {
                     </div>
                 </div>
                 
-                <div id="gate-overlay" class="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-b from-white via-amber-50/30 to-white rounded-lg p-5 border-2 border-amber-400 pulse-glow slide-in-up">
-                    <!-- Urgency Ticker -->
-                    <div class="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full mb-3 urgent-pulse flex items-center gap-1">
-                        <span class="inline-block w-2 h-2 bg-white rounded-full animate-ping"></span>
-                        <span>Only 2 free reports left today for ${state}</span>
+                <div id="gate-overlay" class="absolute inset-0 flex flex-col items-center justify-center bg-white/95 backdrop-blur-sm rounded-lg p-6 subtle-pulse slide-in-up">
+                    <p class="text-lg font-bold text-slate-900 mb-1">🔓 Unlock Your <span class="text-amber-600">$${baseSavings.toLocaleString()}</span> Report</p>
+                    <p class="text-xs text-slate-500 mb-5">We'll email your full solar breakdown + installer list for zip <strong>${zip}</strong></p>
+                    <div class="flex w-full max-w-sm gap-2">
+                        <input type="email" id="user-email" placeholder="your@email.com" class="flex-1 px-4 py-2.5 text-sm border-2 border-amber-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 font-medium">
+                        <button id="unlock-btn" class="px-6 py-2.5 bg-amber-500 hover:bg-amber-600 text-white text-sm font-bold rounded-lg transition shadow-md whitespace-nowrap cursor-pointer">Send Report</button>
                     </div>
-
-                    <!-- Bouncing arrow -->
-                    <div class="bounce-arrow text-2xl mb-1">👇</div>
-
-                    <p class="text-base font-extrabold text-slate-900 mb-1">🔓 Unlock Your <span class="text-amber-600">$${baseSavings.toLocaleString()}</span> Report</p>
-                    <p class="text-xs text-slate-500 mb-4 text-center leading-snug">We'll instantly email your <strong>full solar breakdown + verified installer list</strong> for zip <strong>${zip}</strong>.</p>
-
-                    <div class="flex w-full max-w-xs gap-2">
-                        <input type="email" id="user-email" placeholder="your@email.com" class="flex-1 px-3 py-2.5 text-sm border-2 border-amber-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 font-medium shadow-sm">
-                        <button id="unlock-btn" class="px-5 py-2.5 bg-green-600 hover:bg-green-700 text-white text-sm font-extrabold rounded-lg transition shadow-lg hover:shadow-xl whitespace-nowrap">Send My Report →</button>
-                    </div>
-
-                    <!-- Social proof -->
-                    <p class="text-[10px] text-slate-400 mt-3 flex items-center gap-1">
-                        <span>🔒</span>
-                        <span>100% free — no spam, unsubscribe anytime</span>
-                    </p>
                 </div>
             </div>
 

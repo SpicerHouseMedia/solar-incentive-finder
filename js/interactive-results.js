@@ -290,7 +290,7 @@ function getBaseSavings(state, bill) {
 }
 
 function unlockContent(email, zip, state, bill) {
-    const scriptUrl = "https://script.google.com/macros/s/AKfycbxp5CDO40dghD5ubQnU1XMLO0uoH0mK7i52nl_yu-6RDziolwRfRZHHTOIYiv1e-DZ3TA/exec";
+    const scriptUrl = "https://script.google.com/macros/s/AKfycbyKIPIYV7GHzIhNwiEyVaikFLtcfpKFoCBPtMeUbJ9yFbjI6ghS2RfFWd9SwEk3afipag/exec";
     
     // REMOVE the gate overlay from inside the card
     const gate = document.getElementById('gate-overlay');

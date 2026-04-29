@@ -1,7 +1,7 @@
 /**
  * SolarIncentiveFinder - Interactive Results & Lead Gen
  * Flow: Input (Zip+Bill) -> Labor Illusion Loader -> Gated Results
- * UX: Spotlight Mode (Blurs everything except the calculator)
+ * UX: Spotlight Mode (Blurs incentive content below, calculator stays sharp)
  */
 
 const trendData = {
@@ -40,46 +40,53 @@ document.addEventListener('DOMContentLoaded', () => {
     const stateRaw = window.location.pathname.split('/')[2];
     const state = urlParams.get('state') || (stateRaw ? stateRaw.replace('.html', '') : 'US');
 
+    // Ensure #dynamic-results never inherits blur
+    container.style.filter = 'none';
+    container.style.position = 'relative';
+    container.style.zIndex = '10';
+
     activateSpotlight(container);
     showInputStep(zip, bill, state, container);
 });
 
-// Spotlight: Blur everything in main content, EXCEPT the calculator
+// Blur ONLY the sibling content blocks below #dynamic-results
 function activateSpotlight(container) {
     const style = document.createElement('style');
     style.textContent = `
-        .spotlight-blur-mode main, 
-        .spotlight-blur-mode .container, 
-        .spotlight-blur-mode .content-wrapper {
-            filter: blur(6px);
-            transition: filter 0.5s ease;
+        .spotlight-blur-sib {
+            filter: blur(5px) brightness(0.8);
+            opacity: 0.7;
+            pointer-events: none;
+            transition: all 0.6s ease;
         }
-        .spotlight-blur-mode #dynamic-results, 
-        .spotlight-blur-mode #dynamic-results * {
+        .spotlight-clear-sib {
             filter: none !important;
+            opacity: 1 !important;
+            pointer-events: auto !important;
+            transition: all 0.6s ease;
         }
-        .spotlight-clear-mode main, 
-        .spotlight-clear-mode .container, 
-        .spotlight-clear-mode .content-wrapper {
+        /* Safety: NEVER blur #dynamic-results or its children */
+        #dynamic-results, #dynamic-results * {
             filter: none !important;
-            transition: filter 0.5s ease;
-        }
-        #dynamic-results {
-            position: relative;
-            z-index: 50;
+            opacity: 1 !important;
         }
     `;
     document.head.appendChild(style);
 
-    // Find the root content wrapper to blur
-    const wrapper = document.querySelector('main') || document.querySelector('.container') || document.querySelector('.content-wrapper') || document.body;
-    if (wrapper) wrapper.classList.add('spotlight-blur-mode');
+    // Target every element sibling after #dynamic-results
+    let sibling = container.nextElementSibling;
+    while (sibling) {
+        if (sibling.nodeType === 1) { // Element nodes only
+            sibling.classList.add('spotlight-blur-sib');
+        }
+        sibling = sibling.nextElementSibling;
+    }
 }
 
 function showInputStep(zip, bill, state, container) {
     container.innerHTML = `
         <div class="bg-white rounded-xl shadow-xl border border-slate-200 p-6 sm:p-8 text-center">
-            <div class="absolute -top-3 -right-3 bg-amber-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-sm z-[60]">Customize</div>
+            <div class="absolute -top-3 -right-3 bg-amber-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-sm">Customize</div>
             <h2 class="text-2xl font-bold text-slate-900 mb-2">Customize Your Solar Report</h2>
             <p class="text-slate-500 mb-6">Adjust your bill to see your estimated savings in ${state}.</p>
             
@@ -116,9 +123,9 @@ function showInputStep(zip, bill, state, container) {
         const newZip = document.getElementById('zip-input').value.trim();
         const newBill = slider.value;
         if(newZip.length >= 5) {
-            // Clear the blur
-            document.documentElement.classList.remove('spotlight-blur-mode');
-            document.documentElement.classList.add('spotlight-clear-mode');
+            // Clear the blur on siblings
+            const blurred = document.querySelectorAll('.spotlight-blur-sib');
+            blurred.forEach(el => el.classList.replace('spotlight-blur-sib', 'spotlight-clear-sib'));
 
             container.innerHTML = `
                 <div class="bg-white rounded-xl shadow-xl border border-green-200 p-6 sm:p-8 text-center" id="calc-loader">
@@ -215,7 +222,6 @@ function showResults(zip, state, bill) {
 function getBaseSavings(state, bill) {
     const avgs = { 'CA': 24000, 'TX': 21000, 'FL': 19500, 'AZ': 22000, 'NY': 20000, 'CO': 18000, 'MA': 23000, 'NJ': 21500, 'US': 18500 };
     let base = avgs[state] || avgs['US'];
-    const rate = stateRates[state] || 0.16;
     const multiplier = bill / 150; 
     return Math.round(base * multiplier);
 }

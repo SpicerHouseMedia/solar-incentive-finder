@@ -103,21 +103,29 @@ function activateSpotlight(container) {
     `;
     document.head.appendChild(style);
 
-    // Target every element sibling after #dynamic-results
+    // Target the MAIN content block below #dynamic-results
     let sibling = container.nextElementSibling;
+    let firstContentBlock = null;
+
     while (sibling) {
-        if (sibling.nodeType === 1) { // Element nodes only
-            sibling.classList.add('spotlight-blur-sib');
-            // Add lock badge overlay to main content area
-            if (sibling.tagName === 'MAIN' || sibling.querySelector('main')) {
-                sibling.style.position = 'relative';
-                const badge = document.createElement('div');
-                badge.className = 'lock-badge';
-                badge.innerHTML = '🔒 Unlock Full Breakdown';
-                sibling.appendChild(badge);
+        if (sibling.nodeType === 1) {
+            // Skip navs, we want the content
+            if (sibling.tagName === 'MAIN' || (sibling.tagName === 'DIV' && sibling.offsetHeight > 200)) {
+                firstContentBlock = sibling;
+                break;
             }
         }
         sibling = sibling.nextElementSibling;
+    }
+
+    if (firstContentBlock) {
+        firstContentBlock.classList.add('spotlight-blur-sib');
+        firstContentBlock.style.position = 'relative';
+        
+        const badge = document.createElement('div');
+        badge.className = 'lock-badge';
+        badge.innerHTML = '🔒 Unlock Full Incentives & Installers';
+        firstContentBlock.appendChild(badge);
     }
 }
 
@@ -195,13 +203,6 @@ function showInputStep(zip, bill, state, container) {
 }
 
 function showResults(zip, state, bill) {
-    // Clear the blur on siblings — timed with spinner finish
-    const blurred = document.querySelectorAll('.spotlight-blur-sib');
-    blurred.forEach(el => el.classList.replace('spotlight-blur-sib', 'spotlight-clear-sib'));
-    // Remove lock badge
-    const lockBadges = document.querySelectorAll('.lock-badge');
-    lockBadges.forEach(b => b.remove());
-
     const container = document.getElementById('dynamic-results');
     const baseSavings = getBaseSavings(state, bill);
 
@@ -266,8 +267,15 @@ function getBaseSavings(state, bill) {
 function unlockContent(email, zip, state, bill) {
     const scriptUrl = "https://script.google.com/macros/s/AKfycbxp5CDO40dghD5ubQnU1XMLO0uoH0mK7i52nl_yu-6RDziolwRfRZHHTOIYiv1e-DZ3TA/exec";
 
-    const gate = document.getElementById('gate-overlay');
-    if (gate) gate.remove();
+    // UNBLUR THE STATE CONTENT NOW
+    const allBlurred = document.querySelectorAll('.spotlight-blur-sib');
+    allBlurred.forEach(el => {
+        el.classList.replace('spotlight-blur-sib', 'spotlight-clear-sib');
+        // Remove lock badges
+        const badges = el.querySelectorAll('.lock-badge');
+        badges.forEach(b => b.remove());
+    });
+
     const blurred = document.getElementById('blurred-content');
     if (blurred) blurred.classList.remove('blur-sm', 'select-none', 'pointer-events-none');
 

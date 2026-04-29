@@ -3,7 +3,7 @@
  * Features:
  * 1. Labor Illusion Loader (Builds trust)
  * 2. Dynamic Savings Calculator based on Zip/State
- * 3. Gated Results (Email Capture)
+ * 3. Gated Results (Email Capture + Monthly Bill)
  * 4. Trend Ticker (Social Proof)
  */
 
@@ -108,9 +108,23 @@ function showResults(zip, state) {
                 </div>
                 
                 <!-- The Gate -->
-                <div id="gate-overlay" class="absolute inset-0 flex flex-col items-center justify-center bg-black/10 backdrop-blur-sm rounded-lg">
-                    <p class="text-sm font-bold text-slate-800 mb-2">🔒 Unlock Full Breakdown</p>
-                    <p class="text-xs text-slate-500 mb-2">We'll send you the detailed savings report + local installer list.</p>
+                <div id="gate-overlay" class="absolute inset-0 flex flex-col items-center justify-center bg-black/10 backdrop-blur-sm rounded-lg p-4">
+                    <p class="text-sm font-bold text-slate-800 mb-1">🔒 Unlock Detailed Breakdown</p>
+                    <p class="text-xs text-slate-500 mb-4 text-center">Personalize your report based on your current energy spend.</p>
+                    
+                    <!-- Monthly Bill Slider -->
+                    <div class="w-full max-w-xs mb-3">
+                        <label class="text-xs font-bold text-slate-600 mb-1 block text-center">Avg. Monthly Electric Bill</label>
+                        <div class="flex items-center gap-3">
+                             <span class="text-xs text-slate-400">$50</span>
+                             <input type="range" id="bill-slider" min="50" max="600" value="150" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-amber-500">
+                             <span class="text-xs text-slate-400">$600+</span>
+                        </div>
+                        <div class="text-center mt-1">
+                            <span id="bill-display" class="text-sm font-bold text-amber-600">$150 / mo</span>
+                        </div>
+                    </div>
+
                     <div class="flex w-full max-w-xs gap-2">
                         <input type="email" id="user-email" placeholder="email@address.com" class="flex-1 px-3 py-2 text-sm border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-500">
                         <button id="unlock-btn" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white text-sm font-bold rounded transition">Unlock</button>
@@ -125,18 +139,28 @@ function showResults(zip, state) {
         </div>
     `;
 
+    // Slider Logic
+    const slider = document.getElementById('bill-slider');
+    const display = document.getElementById('bill-display');
+    slider.addEventListener('input', () => {
+        let val = slider.value;
+        display.textContent = `$${val} / mo`;
+    });
+
     // Add Event Listener for Unlock
     document.getElementById('unlock-btn').addEventListener('click', () => {
         const email = document.getElementById('user-email').value;
+        const bill = document.getElementById('bill-slider').value;
+        
         if (email && email.includes('@')) {
-            unlockContent(email, zip, state);
+            unlockContent(email, zip, state, bill);
         } else {
             document.getElementById('user-email').classList.add('border-red-500', 'ring-1', 'ring-red-500');
         }
     });
 }
 
-function unlockContent(email, zip, state) {
+function unlockContent(email, zip, state, bill) {
     const scriptUrl = "https://script.google.com/macros/s/AKfycbxp5CDO40dghD5ubQnU1XMLO0uoH0mK7i52nl_yu-6RDziolwRfRZHHTOIYiv1e-DZ3TA/exec";
     
     document.getElementById('gate-overlay').classList.add('hidden');
@@ -154,7 +178,7 @@ function unlockContent(email, zip, state) {
             email: email,
             zip: zip,
             state: state,
-            bill: "" // Placeholder for future bill slider
+            monthlyBill: bill // Slider value
         })
     }).then(() => console.log("Lead captured successfully"))
       .catch(err => console.error("Lead capture failed:", err));

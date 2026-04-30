@@ -56,7 +56,7 @@
             states: ['Texas','Florida','California','Arizona','Georgia','Pennsylvania','New York','Ohio','Illinois','Colorado'],
             counts: ['42','89','156','67','102','78','134','54','91','45']
         };
-        let idx = 0;
+        let idx = Math.floor(Math.random() * data.states.length);
         setInterval(() => {
             idx = (idx + 1) % data.states.length;
             ticker.innerHTML = `🔴 Live: <span class="font-bold">${data.counts[idx]} homeowners</span> in ${data.states[idx]} checked savings today!`;

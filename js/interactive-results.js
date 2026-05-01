@@ -155,10 +155,10 @@ function showInputStep(zip, bill, state, container) {
     container.innerHTML = `
         <div class="bg-white rounded-xl shadow-xl border border-slate-200 p-6 sm:p-8 text-center">
             <div class="absolute -top-3 -right-3 bg-amber-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-sm">Customize</div>
-            <h2 class="text-2xl font-bold text-slate-900 mb-2">Customize Your Solar Report</h2>
-            <p class="text-slate-500 mb-6">Adjust your bill to see your estimated savings in ${state.toUpperCase()}.</p>
+            <h2 class="text-xl sm:text-2xl font-bold text-slate-900 mb-2">Customize Your Solar Report</h2>
+            <p class="text-xs sm:text-sm text-slate-500 mb-4 sm:mb-6">Adjust your bill to see your estimated savings in ${state.toUpperCase()}.</p>
             
-            <div class="max-w-sm mx-auto space-y-6">
+            <div class="max-w-xs sm:max-w-sm mx-auto space-y-4 sm:space-y-6">
                 <div>
                     <label class="block text-sm font-bold text-left mb-1">Your Zip Code</label>
                     <input type="text" id="zip-input" value="${zip}" placeholder="10001" class="w-full px-4 py-3 border border-slate-300 rounded-lg text-lg focus:outline-none focus:ring-2 focus:ring-amber-500">
@@ -254,17 +254,17 @@ function showResults(zip, state, bill) {
                     </div>
                 </div>
                 
-                <div id="gate-overlay" class="absolute inset-0 flex flex-col items-center justify-center bg-white/95 backdrop-blur-sm rounded-lg p-6 subtle-pulse slide-in-up">
-                    <p class="text-lg font-bold text-slate-900 mb-1">🔓 Unlock Your <span class="text-amber-600">$${baseSavings.toLocaleString()}</span> Report</p>
-                    <p class="text-xs text-slate-500 mb-5">We'll email your full solar breakdown + installer list for zip <strong>${zip}</strong></p>
-                    <div class="flex w-full max-w-sm gap-2">
-                        <input type="email" id="user-email" placeholder="your@email.com" class="flex-1 px-4 py-2.5 text-sm border-2 border-amber-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 font-medium">
-                        <button id="unlock-btn" class="px-6 py-2.5 bg-amber-500 hover:bg-amber-600 text-white text-sm font-bold rounded-lg transition shadow-md whitespace-nowrap cursor-pointer">Send Report</button>
+                <div id="gate-overlay" class="absolute inset-0 flex flex-col items-center justify-center bg-white/95 backdrop-blur-sm rounded-lg p-4 sm:p-6 subtle-pulse slide-in-up">
+                    <p class="text-base sm:text-lg font-bold text-slate-900 mb-1 text-center px-2">🔓 Unlock Your <span class="text-amber-600">$${baseSavings.toLocaleString()}</span> Report</p>
+                    <p class="text-xs text-slate-500 mb-4 text-center px-2">We'll email your full solar breakdown + installer list for zip <strong>${zip}</strong></p>
+                    <div class="flex w-full max-w-xs sm:max-w-sm gap-2 flex-row">
+                        <input type="email" id="user-email" placeholder="your@email.com" class="flex-1 min-w-0 px-3 py-2.5 sm:px-4 sm:py-2.5 text-sm border-2 border-amber-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 font-medium">
+                        <button id="unlock-btn" class="px-4 py-2.5 sm:px-6 bg-amber-500 hover:bg-amber-600 text-white text-xs sm:text-sm font-bold rounded-lg transition shadow-md cursor-pointer whitespace-nowrap">Send</button>
                     </div>
                 </div>
             </div>
 
-            <div class="mt-6 flex gap-3">
+            <div class="mt-4 sm:mt-6 flex flex-col sm:flex-row gap-2 sm:gap-3">
                 <button onclick="window.location.href=window.location.pathname" class="flex-1 text-center bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 px-4 rounded-lg transition">Back</button>
                 <!-- TODO: Update to /blog/2026-solar-guide/ when guide post is built -->
                 <a href="/blog/2026-solar-guide/" class="flex-1 text-center bg-slate-900 hover:bg-slate-800 text-white font-bold py-3 px-4 rounded-lg transition">Read Our Guide</a>

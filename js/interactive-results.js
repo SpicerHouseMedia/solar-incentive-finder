@@ -264,7 +264,7 @@ function showResults(zip, state, bill) {
                 </div>
             </div>
 
-            <div class="mt-6 sm:mt-8 flex flex-col gap-2 sm:gap-3">
+            <div class="mt-8 sm:mt-10 flex flex-col gap-3">
                 <button onclick="window.location.href=window.location.pathname" class="flex-1 text-center bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 px-4 rounded-lg transition">Back</button>
                 <!-- TODO: Update to /blog/2026-solar-guide/ when guide post is built -->
                 <a href="/blog/2026-solar-guide/" class="flex-1 text-center bg-slate-900 hover:bg-slate-800 text-white font-bold py-3 px-4 rounded-lg transition">Read Our Guide</a>

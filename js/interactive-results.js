@@ -257,9 +257,9 @@ function showResults(zip, state, bill) {
                 <div id="gate-overlay" class="absolute inset-0 flex flex-col items-center justify-center bg-white/95 backdrop-blur-sm rounded-lg p-4 sm:p-6 subtle-pulse slide-in-up">
                     <p class="text-base sm:text-lg font-bold text-slate-900 mb-1 text-center px-2">🔓 Unlock Your <span class="text-amber-600">$${baseSavings.toLocaleString()}</span> Report</p>
                     <p class="text-xs text-slate-500 mb-4 text-center px-2">We'll email your full solar breakdown + installer list for zip <strong>${zip}</strong></p>
-                    <div class="flex w-full max-w-xs sm:max-w-sm gap-2 flex-row">
-                        <input type="email" id="user-email" placeholder="your@email.com" class="flex-1 min-w-0 px-3 py-2.5 sm:px-4 sm:py-2.5 text-sm border-2 border-amber-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 font-medium">
-                        <button id="unlock-btn" class="px-4 py-2.5 sm:px-6 bg-amber-500 hover:bg-amber-600 text-white text-xs sm:text-sm font-bold rounded-lg transition shadow-md cursor-pointer whitespace-nowrap">Send</button>
+                    <div class="flex flex-col gap-3">
+                        <input type="email" id="user-email" placeholder="your@email.com" class="w-full px-4 py-3 text-sm border-2 border-amber-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 font-medium">
+                        <button id="unlock-btn" class="w-full py-3 bg-amber-500 hover:bg-amber-600 text-white text-sm font-bold rounded-lg transition shadow-md cursor-pointer">Send Report</button>
                     </div>
                 </div>
             </div>

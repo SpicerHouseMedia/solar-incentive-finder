@@ -230,15 +230,15 @@ function showResults(zip, state, bill) {
     const baseSavings = getBaseSavings(state, bill);
     
     container.innerHTML = `
-        <div class="bg-white rounded-xl shadow-xl border border-green-200 p-6 sm:p-8 animate-fade-in">
-            <div class="flex items-center justify-between mb-4">
-                <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold uppercase">Savings Report</span>
-                <span class="text-slate-400 text-xs">Zip: ${zip}</span>
+        <div class="bg-white rounded-xl shadow-xl border border-green-200 p-4 sm:p-6 md:p-8 animate-fade-in max-w-sm mx-auto w-full">
+            <div class="flex items-center justify-between mb-3">
+                <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-[10px] sm:text-xs font-bold uppercase">Savings Report</span>
+                <span class="text-slate-400 text-[10px] sm:text-xs">Zip: ${zip}</span>
             </div>
             
-            <h2 class="text-2xl font-bold text-slate-900 mb-2">Your Estimated Savings:</h2>
-            <div class="mt-2 mb-6">
-                <span class="text-4xl sm:text-5xl font-extrabold text-green-600">$${baseSavings.toLocaleString()}</span>
+            <h2 class="text-lg sm:text-xl font-bold text-slate-900 mb-1">Your Estimated Savings:</h2>
+            <div class="mt-1 mb-3 sm:mb-5">
+                <span class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-green-600 block break-words leading-none">$${baseSavings.toLocaleString()}</span>
                 <!-- REMOVED: "over 25 years" — shrinks perceived value -->
             </div>
 
@@ -254,9 +254,9 @@ function showResults(zip, state, bill) {
                     </div>
                 </div>
                 
-                <div id="gate-overlay" class="absolute inset-0 flex flex-col items-center justify-center bg-white/95 backdrop-blur-sm rounded-lg p-4 sm:p-6 subtle-pulse slide-in-up">
-                    <p class="text-base sm:text-lg font-bold text-slate-900 mb-1 text-center px-2">🔓 Unlock Your <span class="text-amber-600">$${baseSavings.toLocaleString()}</span> Report</p>
-                    <p class="text-xs text-slate-500 mb-4 text-center px-2">We'll email your full solar breakdown + installer list for zip <strong>${zip}</strong></p>
+                <div id="gate-overlay" class="absolute inset-0 flex flex-col items-center justify-center bg-white/95 backdrop-blur-sm rounded-lg p-3 sm:p-6 subtle-pulse slide-in-up">
+                    <p class="text-sm sm:text-lg font-bold text-slate-900 mb-1 text-center px-1 leading-snug">🔓 Unlock Your <span class="text-amber-600">$${baseSavings.toLocaleString()}</span> Report</p>
+                    <p class="text-xs text-slate-500 mb-3 sm:mb-4 text-center px-1">We'll email your full solar breakdown + installer list for zip <strong>${zip}</strong></p>
                     <div class="flex flex-col gap-3">
                         <input type="email" id="user-email" placeholder="your@email.com" class="w-full px-4 py-3 text-sm border-2 border-amber-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 font-medium">
                         <button id="unlock-btn" class="w-full py-3 bg-amber-500 hover:bg-amber-600 text-white text-sm font-bold rounded-lg transition shadow-md cursor-pointer">Send Report</button>

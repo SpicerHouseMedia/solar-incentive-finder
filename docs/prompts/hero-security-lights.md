@@ -1,0 +1,1 @@
+Modern solar-powered security light mounted on suburban home at dusk, warm lighting on walkway, photorealistic, tech blog quality, 16:9
